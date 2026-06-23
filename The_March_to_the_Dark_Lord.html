@@ -279,8 +279,8 @@ const G={meta:loadMeta(),diff:"normal",party:[],run:null,level:1,gold:30,
   stat(u,s){return u.stats[s]+(u._buff?.[s]||0);}};
 function energyMax(u){return Math.max(2,Math.floor(G.stat(u,"DEX")/5));}
 function newRun(){const order=shuffle(AREAS.map((a,i)=>i)).slice(0,9);
-  const nodes=order.map((ai,i)=>({area:ai,level:i+1,done:false}));
-  nodes.push({darklord:true,level:10,done:false});G.run={nodes,idx:0};G.level=1;G.gold=30;}
+  const nodes=order.map((ai,i)=>({area:ai,level:i+1,done:false,fightPhase:0}));
+  nodes.push({darklord:true,level:10,done:false,fightPhase:0});G.run={nodes,idx:0};G.level=1;G.gold=30;}
 function currentNode(){return G.run.nodes[G.run.idx];}
 const COLS=2,ROWS=6;let C=null;
 function startCombat(spec){
@@ -455,22 +455,29 @@ function checkEnd(){const foes=C.units.filter(u=>u.side==="foe"&&u.alive),heroes
   if(!foes.length){C.over=true;setTimeout(winCombat,480);return true;}
   if(!heroes.length){C.over=true;setTimeout(()=>screenDefeat(G.diff==="hard"),480);return true;}return false;}
 function buildEncounter(boss){const node=currentNode();
-  if(node.darklord){const lord=makeFoe(DARKLORD,G.level);lord._isBoss=true;
-    return{foes:[lord,...DARKLORD.escort.map(e=>makeFoe(e,G.level))].slice(0,10),boss:true};}
+  if(node.darklord){
+    if(boss){const lord=makeFoe(DARKLORD,G.level);lord._isBoss=true;
+      return{foes:[lord,...DARKLORD.escort.map(e=>makeFoe(e,G.level))].slice(0,10),boss:true};}
+    const n=3+rnd(2);const foes=shuffle(DARKLORD.escort.slice()).slice(0,n).map(e=>makeFoe(e,G.level));
+    return{foes,boss:false};}
   const A=AREAS[node.area];
   if(boss){const b=makeFoe(A.boss,G.level);b._isBoss=true;const foes=[b];
     if(A.boss.escort)for(let i=0;i<A.boss.escort.n;i++)foes.push(makeFoe(A.boss.escort,G.level));return{foes,boss:true};}
   const[lo,hi]=A.count,n=lo+rnd(hi-lo+1),foes=[];for(let i=0;i<n;i++)foes.push(makeFoe(A.mob,G.level));return{foes,boss:false};}
-function enterNode(){G.level=currentNode().level;startCombat(buildEncounter(false));}
+function enterNode(){
+  const node=currentNode();G.level=node.level;const ph=node.fightPhase||0;
+  if(ph===5)goBossIntro();
+  else if(ph===3)shopScreen(()=>{node.fightPhase=4;screenMap();});
+  else startCombat(buildEncounter(false));}
 function startBoss(){G.level=currentNode().level;startCombat(buildEncounter(true));}
 function winCombat(){
   if(G.diff!=="hard"){G.party.forEach(h=>{if(!h.alive){h.alive=true;h.hp=Math.max(1,Math.round((50+G.stat(h,"VIT")*h.level)*0.5));}});}
   G.heroes().forEach(h=>{h.st=freshStatus();h._coat=null;h.maxhp=50+G.stat(h,"VIT")*h.level+(h._gHP||0);h.hp=Math.min(h.hp,h.maxhp);});
-  if(C.boss)afterBoss();else afterTrash();}
-function afterTrash(){rollLoot(()=>goBossIntro());}
+  if(C.boss)afterBoss();else afterSkirmish();}
+function afterSkirmish(){rollLoot(()=>manageScreen(()=>{currentNode().fightPhase++;screenMap();},false));}
 function afterBoss(){G.party.forEach(h=>{if(h.alive){h.level++;applyGlyphHooks(h);h.hp=h.maxhp;h._skillPts=(h._skillPts||0)+1;h._statPts=(h._statPts||0)+2;}});
   currentNode().done=true;checkMetaUnlocks();
-  rollLoot(()=>manageScreen(()=>shopScreen(()=>{G.run.idx++;if(G.run.idx>=G.run.nodes.length)screenVictory();else screenMap();}),true));}
+  rollLoot(()=>manageScreen(()=>{G.run.idx++;if(G.run.idx>=G.run.nodes.length)screenVictory();else screenMap();},true));}
 function goBossIntro(){const node=currentNode();const name=node.darklord?DARKLORD.name:AREAS[node.area].name;
   render(`<div class="panel"><div class="eyebrow">Area ${node.level}</div><h2 class="dsp">${name} — Boss</h2>
     <p class="muted small">${node.darklord?"The final formation stands before you: plated knights, archers, a court wizard, and the Dark Lord himself.":AREAS[node.area].check}</p>
@@ -729,9 +736,13 @@ function confirmHero(){const d=CREATE.draft,inp=document.getElementById('hn');if
   if(CREATE.slot<3){CREATE.slot++;CREATE.draft={name:"",race:"human",cls:["Fighter","Rogue","Wizard","Cleric"][CREATE.slot],raceSkill:null};creationScreen();}
   else{G.party=CREATE.heroes.slice();G.party.forEach(u=>{u._statPts=0;u._skillPts=0;});newRun();screenMap();}}
 function prevHero(){if(CREATE.slot>0){CREATE.slot--;const hh=CREATE.heroes[CREATE.slot];CREATE.draft={name:hh.name,race:hh.race,cls:hh.cls,raceSkill:null};creationScreen();}}
+const PHASE_LABELS=['Fight 1 of 4','Fight 2 of 4','Fight 3 of 4','Shop','Fight 4 of 4','Boss'];
+const PHASE_BTNS=['Enter','Enter','Enter','Shop','Enter','Boss'];
 function screenMap(){let h=`<div class="panel"><div class="row spread"><div><div class="eyebrow">The March · ${cap(G.diff)}</div><h2 class="dsp">Your Road</h2></div><div class="muted small">Gold: <b>${G.gold}</b></div></div><div class="map" style="margin-top:10px">`;
   G.run.nodes.forEach((n,i)=>{const cur=i===G.run.idx,name=n.darklord?DARKLORD.name:AREAS[n.area].name,chk=n.darklord?"The final formation.":AREAS[n.area].check;
-    h+=`<div class="node ${cur?'cur':''} ${n.done?'done':''}"><div class="n">${n.darklord?'☠':n.level}</div><div style="flex:1"><b class="dsp" style="color:#fff;font-size:15px">${name}</b><div class="muted small">${chk}</div></div>${cur?'<button class="btn sm" onclick="enterNode()">Enter</button>':n.done?'<span class="muted small">cleared</span>':'<span class="muted small">—</span>'}</div>`;});
+    const ph=n.fightPhase||0,phLabel=PHASE_LABELS[ph],btnLabel=PHASE_BTNS[ph];
+    const sub=cur?`<span class="tag" style="color:var(--bronze2);border-color:var(--bronze2);margin-right:6px">${phLabel}</span>${chk}`:chk;
+    h+=`<div class="node ${cur?'cur':''} ${n.done?'done':''}"><div class="n">${n.darklord?'☠':n.level}</div><div style="flex:1"><b class="dsp" style="color:#fff;font-size:15px">${name}</b><div class="muted small">${sub}</div></div>${cur?`<button class="btn sm" onclick="enterNode()">${btnLabel}</button>`:n.done?'<span class="muted small">cleared</span>':'<span class="muted small">—</span>'}</div>`;});
   h+=`</div><div class="row" style="margin-top:12px"><button class="btn ghost sm" onclick="manageScreen(screenMap,false)">Inspect Company</button></div></div>`;render(h);}
 function screenVictory(){G.meta.wins=(G.meta.wins||0)+1;saveMeta(G.meta);
   render(`<div class="center" style="padding-top:40px"><div class="eyebrow">The formation breaks</div><h1 class="title">The Dark Lord Falls</h1><div class="rule"></div>
