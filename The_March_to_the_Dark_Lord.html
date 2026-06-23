@@ -1,0 +1,708 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The March to the Dark Lord</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@500;700&family=EB+Garamond:ital@0;1&display=swap" rel="stylesheet">
+<style>
+:root{
+  --field:#191d24; --field2:#12151b; --bone:#f2ecda; --panel-ink:#23211a;
+  --line:#3a4250; --bronze:#a8531b; --bronze2:#c9772f; --gold:#d9b15a; --sub:#8a93a1;
+  --burn:#d4791f; --bleed:#b23a3a; --frost:#5a9bd4; --poison:#6f9b3e; --sunder:#9a7b3a; --stun:#b9a14a; --freeze:#7fbce0;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{background:radial-gradient(120% 90% at 50% 0%,#20262f 0%,var(--field) 45%,var(--field2) 100%);
+  color:#d7dae0;font-family:"EB Garamond",Georgia,serif;font-size:17px;line-height:1.45;-webkit-text-size-adjust:100%}
+h1,h2,h3,.dsp{font-family:"Cinzel",serif;letter-spacing:.04em}
+button{font-family:inherit;cursor:pointer}
+.wrap{max-width:1060px;margin:0 auto;padding:14px}
+.eyebrow{font-family:"Cinzel",serif;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--bronze2)}
+.title{font-size:clamp(30px,7vw,52px);font-weight:700;color:var(--bone);margin:.1em 0;text-shadow:0 2px 0 #000}
+.rule{height:2px;background:linear-gradient(90deg,transparent,var(--bronze),transparent);margin:10px 0 18px}
+.panel{background:linear-gradient(180deg,#efe9d8,#e4dcc6);color:var(--panel-ink);border:1px solid #b9ad8c;
+  border-radius:6px;box-shadow:0 1px 0 #fff inset,0 10px 30px rgba(0,0,0,.45);padding:16px;margin-bottom:14px}
+.card{background:#1c212a;border:1px solid var(--line);border-radius:6px;padding:12px;margin-bottom:10px}
+.btn{background:linear-gradient(180deg,var(--bronze2),var(--bronze));color:#1c130a;border:1px solid #7a3c12;border-radius:5px;
+  padding:10px 16px;font-weight:700;font-family:"Cinzel",serif;font-size:13px;letter-spacing:.06em;text-transform:uppercase;
+  box-shadow:0 1px 0 rgba(255,255,255,.25) inset}
+.btn:hover{filter:brightness(1.08)} .btn:active{transform:translateY(1px)}
+.btn.ghost{background:#222833;color:#d7dae0;border:1px solid var(--line)}
+.btn.sm{padding:6px 10px;font-size:11px}
+.btn:disabled{opacity:.4;cursor:not-allowed;filter:none}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.spread{justify-content:space-between}
+.grid{display:grid;gap:10px}
+.tag{display:inline-block;font-family:"Cinzel",serif;font-size:10px;letter-spacing:.08em;text-transform:uppercase;padding:2px 7px;border-radius:99px;border:1px solid currentColor}
+.muted{color:var(--sub)} .small{font-size:13px} .center{text-align:center}
+.hp{height:9px;border-radius:6px;background:#0c0f14;border:1px solid #000;overflow:hidden}
+.hp>i{display:block;height:100%;background:linear-gradient(90deg,#5a8f3a,#7cc04f)}
+.en{height:7px;border-radius:6px;background:#0c0f14;border:1px solid #000;overflow:hidden;margin-top:3px}
+.en>i{display:block;height:100%;background:linear-gradient(90deg,#3f74c2,#69a8e6)}
+.board{display:grid;grid-template-columns:1fr 1fr;gap:8px;background:#0e1117;border:1px solid var(--line);border-radius:8px;padding:10px}
+.cell{min-height:64px;border:1px dashed #2a313d;border-radius:6px;display:flex;align-items:center;justify-content:center;position:relative;transition:background .12s}
+.cell.tgt{outline:2px solid var(--bronze2);background:rgba(201,119,47,.12);cursor:pointer}
+.cell.movetgt{outline:2px solid var(--frost);background:rgba(90,155,212,.12);cursor:pointer}
+.unit{width:100%;height:100%;border-radius:6px;padding:5px 6px;display:flex;flex-direction:column;gap:3px;border:1px solid #000;position:relative;font-size:12px;cursor:pointer}
+.unit.hero{background:linear-gradient(180deg,#243245,#1a2433);border-color:#37506e}
+.unit.foe{background:linear-gradient(180deg,#3a2230,#281620);border-color:#5e2c3c}
+.unit.active{box-shadow:0 0 0 2px var(--gold),0 0 14px rgba(217,177,90,.5)}
+.unit.sel{box-shadow:0 0 0 2px var(--bronze2)}
+.unit .nm{font-family:"Cinzel",serif;font-size:11px;color:#fff;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.badges{display:flex;gap:3px;flex-wrap:wrap}
+.bdg{font-size:9px;font-weight:700;padding:1px 4px;border-radius:4px;color:#0c0f14;font-family:"Cinzel",serif}
+.b-burn{background:var(--burn)} .b-bleed{background:var(--bleed)} .b-chill{background:var(--frost)}
+.b-poison{background:var(--poison)} .b-sunder{background:var(--sunder)} .b-stun{background:var(--stun)}
+.b-freeze{background:var(--freeze)} .b-guard{background:#9fb0c4} .b-armor{background:#c9c2ad} .b-bless{background:var(--gold)}
+.log{background:#0c0f14;border:1px solid var(--line);border-radius:6px;padding:10px;height:150px;overflow:auto;font-size:13px}
+.log p{margin:0 0 4px}
+.actbar{display:flex;gap:8px;flex-wrap:wrap}
+.pill{background:#222833;border:1px solid var(--line);border-radius:5px;padding:7px 11px;font-size:13px;cursor:pointer}
+.pill:hover{border-color:var(--bronze2)} .pill.on{background:var(--bronze);color:#1c130a;border-color:#7a3c12}
+.pick{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px}
+.opt{border:1px solid #b9ad8c;border-radius:6px;padding:10px;cursor:pointer;background:#efe9d8;color:var(--panel-ink)}
+.opt:hover{border-color:var(--bronze)} .opt.on{outline:2px solid var(--bronze);background:#f6f1e2}
+.map{display:flex;flex-direction:column;gap:6px}
+.node{display:flex;gap:12px;align-items:center;border:1px solid var(--line);border-radius:6px;padding:10px 12px;background:#1c212a}
+.node.cur{border-color:var(--gold);box-shadow:0 0 12px rgba(217,177,90,.25)} .node.done{opacity:.5}
+.node .n{font-family:"Cinzel",serif;color:var(--gold);width:26px;text-align:center}
+.loot-it,.shop-it{display:flex;justify-content:space-between;align-items:center;gap:10px;border:1px solid #b9ad8c;border-radius:6px;padding:8px 10px;background:#efe9d8;color:var(--panel-ink);margin-bottom:6px}
+.statline{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;text-align:center}
+.statline div{background:#171b22;border:1px solid var(--line);border-radius:5px;padding:6px 4px}
+.statline b{display:block;font-family:"Cinzel",serif;color:var(--gold);font-size:18px}
+.statline span{font-size:10px;letter-spacing:.14em;color:var(--sub)}
+.flash{position:fixed;left:50%;top:18px;transform:translateX(-50%);background:#1c212a;border:1px solid var(--bronze);color:var(--bone);padding:8px 16px;border-radius:6px;z-index:50;font-family:"Cinzel",serif;font-size:13px;opacity:0;transition:opacity .25s}
+.flash.show{opacity:1}
+select,input{font-family:inherit;font-size:15px;padding:7px;border-radius:5px;border:1px solid #b9ad8c;background:#fff;color:#23211a}
+@media(max-width:560px){body{font-size:16px}.cell{min-height:56px}}
+</style>
+</head>
+<body>
+<div class="flash" id="flash"></div>
+<div class="wrap" id="app"></div>
+<script>
+"use strict";
+const Store=(()=>{let mem={};return{
+  get(k){try{const v=localStorage.getItem(k);return v==null?null:v;}catch(e){return mem[k]??null;}},
+  set(k,v){try{localStorage.setItem(k,v);}catch(e){mem[k]=v;}}};})();
+const META_KEY="march_meta_v1";
+function loadMeta(){try{return JSON.parse(Store.get(META_KEY))||{unlocks:{}};}catch(e){return{unlocks:{}};}}
+function saveMeta(m){Store.set(META_KEY,JSON.stringify(m));}
+const rnd=n=>Math.floor(Math.random()*n);
+const pick=a=>a[rnd(a.length)];
+const clamp=(v,a,b)=>Math.max(a,Math.min(b,v));
+const cap=s=>s.charAt(0).toUpperCase()+s.slice(1);
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=rnd(i+1);[a[i],a[j]]=[a[j],a[i]];}return a;}
+function flash(m){const f=document.getElementById('flash');f.textContent=m;f.classList.add('show');clearTimeout(f._t);f._t=setTimeout(()=>f.classList.remove('show'),1400);}
+function render(html){document.getElementById('app').innerHTML=html;window.scrollTo(0,0);}
+const STATNAMES=["STR","DEX","FOC","VIT","LCK"];
+const RACES={
+  human:{name:"Human",spread:{STR:15,DEX:15,FOC:15,VIT:15,LCK:15},free:true,desc:"Even on every axis; picks any basic skill."},
+  dwarf:{name:"Dwarf",spread:{STR:18,DEX:12,FOC:12,VIT:20,LCK:13},signature:"blacksmithing",desc:"Stout. Starts with Blacksmithing."}
+};
+const CLASSES={
+  Fighter:{add:{STR:5,VIT:5},setSkill:"bash",hint:"STR / VIT — frontline striker"},
+  Rogue:{add:{DEX:5,LCK:5},setSkill:"poisoned_throw",hint:"DEX / LCK — thrown poison & bleed"},
+  Wizard:{add:{FOC:5,LCK:5},setSkill:"magic_bolt",hint:"FOC / LCK — ranged spells"},
+  Cleric:{add:{VIT:5,FOC:5},setSkill:"mend",hint:"VIT / FOC — heals & cleanses"}
+};
+const RARITIES=["common","uncommon","rare","epic","legendary","artifact"];
+const PRICE={common:3,uncommon:6,rare:9,epic:12,legendary:15,artifact:20};
+const SLOTS={common:1,uncommon:2,rare:3,epic:4,legendary:5,artifact:6};
+const LOOT_TABLE={
+ 1:[85,13,1,0.7,0.3,0],2:[72,22,4,1.3,0.7,0],3:[60,28,8,2.5,1.5,0],4:[48,32,13,4.5,2.3,0.2],
+ 5:[38,33,18,7,3.5,0.5],6:[28,32,23,11,5,1],7:[20,28,27,15,8,2],8:[13,23,29,19,13,3],
+ 9:[8,18,30,24,16,4],10:[5,14,29,27,20,5]};
+const WEAPONS={
+  dagger:{name:"Dagger",base:3,cost:1,reach:1,kind:"melee",light:true},
+  shortsword:{name:"Shortsword",base:5,cost:1,reach:1,kind:"melee",light:true},
+  shortbow:{name:"Shortbow",base:4,cost:1,reach:99,kind:"ranged",light:true},
+  longsword:{name:"Longsword",base:8,cost:1,reach:1,kind:"melee"},
+  hammer:{name:"Hammer",base:9,cost:1,reach:1,kind:"melee"},
+  spear:{name:"Spear",base:7,cost:1,reach:2,kind:"melee"},
+  bow:{name:"Bow",base:8,cost:1,reach:99,kind:"ranged"},
+  claymore:{name:"Claymore",base:16,cost:2,reach:1,kind:"melee",pierce:true,req:{STR:20}},
+  battleaxe:{name:"Battle Axe",base:14,cost:2,reach:1,kind:"melee",pierce:true,req:{STR:20}},
+  halberd:{name:"Halberd",base:13,cost:2,reach:2,kind:"melee",pierce:true,req:{STR:20}},
+  crossbow:{name:"Crossbow",base:12,cost:2,reach:99,kind:"ranged",pierce:true,req:{STR:20}},
+  wand:{name:"Wand",base:0,cost:1,reach:99,kind:"focus",focus:"wand"}
+};
+const BODY={robe:{name:"Robe",soak:1,gate:0},leather:{name:"Leather",soak:3,gate:15},chainmail:{name:"Chainmail",soak:5,gate:20},platemail:{name:"Platemail",soak:8,gate:25},fullplate:{name:"Full Platemail",soak:12,gate:30}};
+const HEAD={hat:{name:"Wizard Hat",soak:1,gate:0},headband:{name:"Head Band",soak:1,gate:0},helm:{name:"Helm",soak:3,gate:15},closed:{name:"Closed-face Helm",soak:5,gate:20}};
+const FEET={shoes:{name:"Shoes",soak:1,gate:0},boots:{name:"Boots",soak:3,gate:15},armoredboots:{name:"Armored Boots",soak:5,gate:20},sabatons:{name:"Sabatons",soak:8,gate:25}};
+const SHIELDS={buckler:{name:"Buckler",soak:2,gate:0},heater:{name:"Heater",soak:4,gate:15},kite:{name:"Kite",soak:6,gate:20},scutum:{name:"Scutum",soak:8,gate:25}};
+const GLYPHS={
+  flame:{name:"Flame Glyph",on:"weapon",effect:"Burn on hit (scales with rarity)"},
+  venom:{name:"Venom Glyph",on:"weapon",effect:"Poison on hit (scales with rarity)"},
+  razor:{name:"Razor Glyph",on:"weapon",effect:"Bleed on hit (scales with rarity)"},
+  stone:{name:"Stone Glyph",on:"armor",effect:"+soak/round (scales with rarity)"},
+  vigor:{name:"Vigor Glyph",on:"armor",effect:"+max HP (scales with rarity)"}
+};
+function glyphScale(key,rarity){const idx=Math.max(0,RARITIES.indexOf(rarity||"common")),sc=idx+1;
+  if(key==="flame")return{kind:"burn",n:sc,txt:`+${sc} Burn on hit`};
+  if(key==="razor")return{kind:"bleed",n:sc,txt:`+${sc} Bleed on hit`};
+  if(key==="venom")return{kind:"poison",dmg:3+idx*2,rounds:3,txt:`Poison ${3+idx*2}x3 on hit`};
+  if(key==="stone")return{kind:"soak",n:2*sc,txt:`+${2*sc} soak/round`};
+  if(key==="vigor")return{kind:"hp",n:10*sc,txt:`+${10*sc} max HP`};
+  return{kind:"",n:0,txt:""};}
+function freshStatus(){return{burn:0,bleed:0,chill:0,poison:null,sunder:null,stun:0,frozen:false,frozenHit:false,guard:null,armorBuff:0,bless:null};}
+const SKILLS={
+ bash:{name:"Bash",cls:"Fighter",req:["STR",15],cost:1,uses:2,target:"enemy",reach:1,tier:1,
+   text:r=>`Weapon +STR/5 +${[0,0,4,4,8,8][r]}, Stun ${[0,1,1,2,2,3][r]}`,
+   use:(g,a,t,r)=>{g.weaponHit(a,t);g.dealRaw(a,t,[0,0,4,4,8,8][r],"bash");g.applyStun(t,[0,1,1,2,2,3][r]);t.energy=0;g.log(`<span class="muted">${t.name} is dazed — loses their whole action.</span>`);}},
+ sunder_strike:{name:"Sunder Strike",cls:"Fighter",req:["STR",18],cost:1,target:"enemy",reach:1,tier:1,
+   text:r=>`Weapon, -${r>=3?5:3} soak ${[0,1,2,3,4,99][r]>9?'(combat)':[0,1,2,3,4,99][r]+'rd'}`,
+   use:(g,a,t,r)=>{g.weaponHit(a,t);g.applySunder(t,r>=3?5:3,[0,1,2,3,4,99][r]);}},
+ guard:{name:"Guard",cls:"Fighter",req:["VIT",15],cost:1,target:"ally",tier:1,
+   text:r=>`Intercept for ${r>=3?2:1} ally, cut VIT/${[0,5,5,4,4,3][r]}`,
+   use:(g,a,t,r)=>{a.st.guard={ward:t.id,div:[0,5,5,4,4,3][r]};g.log(a.name+" guards "+t.name+".");}},
+ cleave:{name:"Cleave",cls:"Fighter",req:["STR",30],cost:2,target:"enemy",reach:1,tier:2,
+   text:r=>`Hit target's rank${r>=3?' + behind':''}, weapon +STR/${[0,5,5,4,3,3][r]}`,
+   use:(g,a,t,r)=>{g.cleaveTargets(t,r).forEach(x=>g.weaponHit(a,x,[0,5,5,4,3,3][r]));}},
+ shield_wall:{name:"Shield Wall",cls:"Fighter",req:["STR",25],req2:["VIT",25],cost:2,target:"self",tier:2,
+   text:r=>`You + adjacent allies +VIT/${[0,5,4,4,3,3][r]} soak`,
+   use:(g,a,t,r)=>{[a,...g.adjacentAllies(a)].forEach(x=>{x.st.armorBuff+=Math.floor(g.stat(x,"VIT")/[0,5,4,4,3,3][r]);g.refreshSoak(x);});g.log(a.name+" raises a shield wall.");}},
+ poisoned_throw:{name:"Poisoned Throw",cls:"Rogue",req:["DEX",15],cost:1,target:"enemy",thrown:true,minRange:2,tier:1,
+   text:r=>`Weapon +DEX/5, Poison ${[0,5,6,7,8,8][r]}x${[0,5,5,5,5,6][r]}`,
+   use:(g,a,t,r)=>{g.weaponHit(a,t,5,true);g.applyPoison(t,[0,5,6,7,8,8][r],[0,5,5,5,5,6][r]);}},
+ razor_fan:{name:"Razor Fan",cls:"Rogue",req:["DEX",18],cost:1,target:"enemy",thrown:true,tier:1,
+   text:r=>`Weapon +DEX/5, +${[0,3,4,5,6,6][r]} Bleed${r>=5?' (+behind)':''}`,
+   use:(g,a,t,r)=>{g.weaponHit(a,t,5,true);g.applyBleed(t,[0,3,4,5,6,6][r]);if(r>=5){const b=g.behind(t);if(b)g.applyBleed(b,6);}}},
+ exploit:{name:"Exploit",cls:"Rogue",req:["DEX",18],cost:2,target:"enemy",thrown:true,tier:1,
+   text:r=>`+${[0,50,65,80,95,110][r]}% vs afflicted${r>=5?', crit':''}`,
+   use:(g,a,t,r)=>{const aff=g.afflicted(t);const mult=aff?1+[0,50,65,80,95,110][r]/100:1;g.weaponHit(a,t,5,true,mult,aff&&r>=5);}},
+ rupture:{name:"Rupture",cls:"Rogue",req:["DEX",25],cost:2,target:"enemy",thrown:true,tier:2,
+   text:r=>`Detonate Bleed x${[0,3,4,4,5,5][r]}${r>=5?', contagion':''}`,
+   use:(g,a,t,r)=>{const m=[0,3,4,4,5,5][r];const b=t.st.bleed;if(b<=0){g.log(t.name+" has no Bleed.");g.weaponHit(a,t,5,true);return;}g.dealRaw(a,t,b*m,"rupture");t.st.bleed=0;if(r>=5){const h=Math.floor(b/2);g.adjacentEnemiesOf(a,t).forEach(x=>{if(x.st.bleed>0)g.applyBleed(x,Math.max(1,Math.floor(h/2)));});}}},
+ magic_bolt:{name:"Magic Bolt",cls:"Wizard",req:["FOC",15],cost:1,target:"enemy",ranged:true,tier:1,
+   text:r=>`${[0,8,11,14,17,20][r]} magic damage`,
+   use:(g,a,t,r)=>g.spellHit(a,t,[0,8,11,14,17,20][r])},
+ firebolt:{name:"Firebolt",cls:"Wizard",req:["FOC",18],cost:1,target:"enemy",ranged:true,tier:1,
+   text:r=>`${[0,6,8,10,12,14][r]} dmg + ${[0,2,2,3,3,4][r]} Burn`,
+   use:(g,a,t,r)=>{g.spellHit(a,t,[0,6,8,10,12,14][r]);g.applyBurn(t,[0,2,2,3,3,4][r]);}},
+ frost_shard:{name:"Frost Shard",cls:"Wizard",req:["FOC",18],cost:1,target:"enemy",ranged:true,tier:1,
+   text:r=>`${[0,5,7,9,11,13][r]} dmg + ${[0,2,2,3,3,4][r]} Chill`,
+   use:(g,a,t,r)=>{g.spellHit(a,t,[0,5,7,9,11,13][r]);g.applyChill(t,[0,2,2,3,3,4][r]);}},
+ fireball:{name:"Fireball",cls:"Wizard",req:["FOC",28],cost:2,target:"aoe",ranged:true,tier:2,
+   text:r=>`AoE ${[0,8,10,12,14,16][r]} dmg + Burn (friend & foe)`,
+   use:(g,a,t,r)=>{g.aoeAt(t,a,x=>{g.spellHit(a,x,[0,8,10,12,14,16][r]);g.applyBurn(x,r>=4?2:1);},r>=5?2:1);}},
+ combustion:{name:"Combustion",cls:"Wizard",req:["FOC",25],cost:2,target:"enemy",ranged:true,tier:2,
+   text:r=>`Detonate Burn x${[0,3,4,4,5,5][r]} (ignores armor)`,
+   use:(g,a,t,r)=>{const m=[0,3,4,4,5,5][r];const b=t.st.burn;if(b<=0){g.log(t.name+" isn't burning.");g.spellHit(a,t,6);return;}g.dealRaw(a,t,b*m,"combustion",true);t.st.burn=0;if(r>=3)g.adjacentEnemiesOf(a,t).forEach(x=>g.dealRaw(a,x,b,"combustion",true));}},
+ mend:{name:"Mend",cls:"Cleric",req:["FOC",15],cost:1,target:"ally",tier:1,
+   text:r=>`Heal ${[0,5,7,9,11,11][r]}xlvl${r>=5?' +adjacent':''}`,
+   use:(g,a,t,r)=>{g.heal(a,t,[0,5,7,9,11,11][r]*g.level);if(r>=5){const x=g.adjacentAllies(t)[0];if(x)g.heal(a,x,5*g.level);}}},
+ purify:{name:"Purify",cls:"Cleric",req:["FOC",18],cost:1,uses:2,target:"ally",tier:1,
+   text:r=>`Cleanse ${[0,2,3,3,4,99][r]>9?'all of one':[0,2,3,3,4,99][r]} stacks`,
+   use:(g,a,t,r)=>g.purify(t,[0,2,3,3,4,99][r],r>=5)},
+ bless:{name:"Bless",cls:"Cleric",req:["FOC",18],cost:1,target:"ally",tier:1,
+   text:r=>`Next ${r>=3?3:2} hits +${[0,20,30,30,40,40][r]}%`,
+   use:(g,a,t,r)=>{t.st.bless={pct:[0,20,30,30,40,40][r],hits:r>=3?3:2};g.log(a.name+" blesses "+t.name+".");if(r>=5){const x=g.adjacentAllies(t)[0];if(x)x.st.bless={pct:40,hits:3};}}},
+ benediction:{name:"Benediction",cls:"Cleric",req:["FOC",25],cost:2,target:"self",tier:2,
+   text:r=>`Party next hit +${[0,15,20,25,30,30][r]}%${r>=5?', heal':''}`,
+   use:(g,a,t,r)=>{g.heroesAlive().forEach(x=>x.st.bless={pct:[0,15,20,25,30,30][r],hits:1});if(r>=5)g.heroesAlive().forEach(x=>g.heal(a,x,5*g.level));g.log(a.name+" calls a benediction.");}}
+};
+const BASIC_SKILLS=Object.keys(SKILLS).filter(k=>SKILLS[k].tier===1);
+const PROFESSIONS={
+ alchemy:{name:"Alchemy",req:["FOC",20],desc:"Craft poison bottles & molotovs in shops."},
+ trader:{name:"Trader",req:["LCK",15],desc:"Sell loot at 30%→50% as it ranks."},
+ blacksmithing:{name:"Blacksmithing",req:["STR",20],desc:"Socket glyphs free; plate an ally in combat."}
+};
+function poisonBottle(r){const m={common:[5,5],uncommon:[8,5],rare:[8,8],epic:[12,8],legendary:[12,12],artifact:[15,15]}[r];return{type:"consumable",sub:"poison",rarity:r,name:cap(r)+" Poison Bottle",dmg:m[0],rounds:m[1]};}
+function molotov(r){const m={common:[5,5],uncommon:[8,5],rare:[8,8],epic:[12,8],legendary:[12,12],artifact:[15,15]}[r];return{type:"consumable",sub:"molotov",rarity:r,name:cap(r)+" Molotov",dmg:m[0],rounds:m[1]};}
+function potion(r){const h={common:20,uncommon:35,rare:55,epic:80,legendary:120,artifact:180}[r];return{type:"consumable",sub:"potion",rarity:r,name:cap(r)+" Healing Potion",heal:h};}
+const AREAS=[
+ {key:"forest",name:"The Forest",mob:{name:"Beast",cls:"Fighter",wpn:"longsword"},count:[4,5],boss:{name:"Scarred Bear",cls:"Fighter",mult:2,wpn:"battleaxe"},check:"Burst-and-tank; bring an anti-dogpile tool."},
+ {key:"goblins",name:"Goblin Burrowers",mob:{name:"Goblin",cls:"Rogue",wpn:"dagger",mult:0.5},count:[4,6],boss:{name:"Goblin King",cls:"Fighter",mult:1,wpn:"longsword",summon:{name:"Goblin Rogue",cls:"Rogue",wpn:"dagger",mult:0.5,n:2}},check:"Add-flood at 50% HP."},
+ {key:"swamp",name:"The Swamp",mob:{name:"Swamp Beast",cls:"Fighter",wpn:"hammer"},count:[4,6],boss:{name:"Bog Witch",cls:"Wizard",mult:1.5,escort:{name:"Croc",cls:"Fighter",wpn:"hammer",mult:1,n:2}},check:"Protected priority target."},
+ {key:"graveyard",name:"The Graveyard",mob:{name:"Skeleton",cls:"Rogue",wpn:"shortbow"},count:[4,5],boss:{name:"Necromancer",cls:"Cleric",mult:2,escort:{name:"Undead Wizard",cls:"Wizard",mult:1,n:2}},check:"Anti-sustain; focus fire."},
+ {key:"caverns",name:"The Caverns",mob:{name:"Giant Spider",cls:"Rogue",wpn:"dagger"},count:[4,6],boss:{name:"Broodmother",cls:"Rogue",mult:1.5,wpn:"dagger",summon:{name:"Spiderling",cls:"Rogue",wpn:"dagger",mult:0.5,n:2,every:2}},check:"Summoner-swarm race."},
+ {key:"frost",name:"Frostpeak",mob:{name:"Frost Wolf",cls:"Fighter",wpn:"longsword",chill:true},count:[4,5],boss:{name:"Frost Wyrm",cls:"Wizard",mult:1.5,breath:true},check:"Control / freeze check."},
+ {key:"road",name:"The King's Road",mob:{name:"Bandit",cls:"Fighter",wpn:"longsword",shield:"heater"},count:[4,5],boss:{name:"Black Knight",cls:"Fighter",mult:1.5,wpn:"longsword",body:"fullplate",shield:"scutum",escort:{name:"Crossbowman",cls:"Rogue",wpn:"crossbow",mult:1,n:2}},check:"Armor-wall triangle."},
+ {key:"bridge",name:"Trollbridge",mob:{name:"Ogre",cls:"Fighter",wpn:"hammer",body:"leather"},count:[2,3],boss:{name:"Bridge Troll",cls:"Fighter",mult:2,wpn:"hammer",regen:true},check:"Sustain race; burn stops regen."},
+ {key:"fungal",name:"The Fungal Deep",mob:{name:"Myconid",cls:"Wizard"},count:[4,6],boss:{name:"Myconid Sovereign",cls:"Wizard",mult:1.5,disease:true},check:"Attrition / cleanse check."},
+ {key:"cliffs",name:"Harpy Cliffs",mob:{name:"Harpy",cls:"Rogue",wpn:"shortbow"},count:[4,5],boss:{name:"The Matriarch",cls:"Rogue",mult:1.5,wpn:"bow"},check:"Reach & closing check."}
+];
+const DARKLORD={name:"The Dark Lord",cls:"Fighter",mult:2,wpn:"claymore",body:"fullplate",escort:[
+ {name:"Plate Knight",cls:"Fighter",wpn:"longsword",body:"fullplate",shield:"scutum",mult:1},
+ {name:"Plate Knight",cls:"Fighter",wpn:"longsword",body:"fullplate",shield:"scutum",mult:1},
+ {name:"Archer",cls:"Rogue",wpn:"bow",mult:1},{name:"Archer",cls:"Rogue",wpn:"bow",mult:1},
+ {name:"Court Wizard",cls:"Wizard",mult:1}]};
+let UID=1;
+function weaponItem(k){return{type:"weapon",slot:"hand",key:k,...WEAPONS[k],rarity:"common",sockets:[]};}
+function shieldItem(k){return{type:"shield",slot:"hand",key:k,...SHIELDS[k],rarity:"common",sockets:[]};}
+function makeHero(name,race,cls,raceSkill){
+  const sp={...RACES[race].spread},add=CLASSES[cls].add;for(const k in add)sp[k]+=add[k];
+  const u={id:UID++,side:"hero",name,race,cls,level:1,stats:sp,gear:{head:null,body:null,feet:null,hand1:null,hand2:null},
+    skills:{},professions:{},inv:[],skillUses:{},alive:true,st:freshStatus()};
+  const kits={Wizard:{head:"hat",body:"robe",feet:"shoes",hand1:"dagger"},
+    Fighter:{head:"helm",body:"chainmail",feet:"boots",hand1:"longsword",hand2:"heater"},
+    Rogue:{head:"headband",body:"leather",feet:"boots",hand1:"shortbow"},
+    Cleric:{head:"helm",body:"chainmail",feet:"boots",hand1:"hammer",hand2:"heater"}};
+  const k=kits[cls];
+  u.gear.head={slot:"head",key:k.head,...HEAD[k.head],rarity:"common",sockets:[]};
+  u.gear.body={slot:"body",key:k.body,...BODY[k.body],rarity:"common",sockets:[]};
+  u.gear.feet={slot:"feet",key:k.feet,...FEET[k.feet],rarity:"common",sockets:[]};
+  u.gear.hand1=weaponItem(k.hand1);
+  if(k.hand2)u.gear.hand2=shieldItem(k.hand2);
+  u.skills[CLASSES[cls].setSkill]=1;
+  if(RACES[race].signature)u.skills[RACES[race].signature]=1;else if(raceSkill)u.skills[raceSkill]=1;
+  applyGlyphHooks(u);u.hp=u.maxhp;
+  return u;
+}
+const CLASS_WPN={Fighter:"longsword",Rogue:"dagger",Wizard:"wand",Cleric:"hammer"};
+function makeFoe(t,level){
+  const cls=t.cls,lv=Math.max(1,Math.round(level*(t.mult||1)));
+  const sp={...RACES.human.spread},add=CLASSES[cls].add;for(const k in add)sp[k]+=add[k];
+  const bump=Math.floor((lv-1)*1.5);for(const k in add)sp[k]+=bump;
+  const u={id:UID++,side:"foe",name:t.name,cls,level:lv,stats:sp,gear:{},skills:{},inv:[],alive:true,st:freshStatus(),tmpl:t,ai:true};
+  u.gear.hand1=weaponItem(t.wpn||(cls==="Wizard"?"wand":CLASS_WPN[cls]));
+  u.gear.body={slot:"body",key:t.body||"robe",...BODY[t.body||"robe"],rarity:"common",sockets:[]};
+  if(t.shield)u.gear.hand2=shieldItem(t.shield);
+  u.skills[CLASSES[cls].setSkill]=clamp(1+Math.floor(lv/3),1,5);
+  if(t.chill)u._chillHit=true;
+  applyGlyphHooks(u);u.hp=u.maxhp;
+  return u;
+}
+function applyGlyphHooks(u){u._gBurn=u._gBleed=u._gSoak=u._gHP=0;u._gPoison=null;
+  ["head","body","feet","hand1","hand2"].forEach(s=>{const it=u.gear[s];if(it&&it.sockets)it.sockets.forEach(soc=>{
+    const key=(soc&&soc.key)||soc;const rar=(soc&&soc.rarity)||it.rarity||"common";const g=glyphScale(key,rar);
+    if(g.kind==="burn")u._gBurn+=g.n; else if(g.kind==="bleed")u._gBleed+=g.n;
+    else if(g.kind==="poison"){if(!u._gPoison||g.dmg>u._gPoison.dmg)u._gPoison={dmg:g.dmg,rounds:g.rounds};}
+    else if(g.kind==="soak")u._gSoak+=g.n; else if(g.kind==="hp")u._gHP+=g.n;});});
+  const old=u.maxhp||0;u.maxhp=50+statRaw(u,"VIT")*u.level+(u._gHP||0);if(u.hp>0&&old)u.hp=Math.min(u.maxhp,u.hp+(u.maxhp-old));}
+function statRaw(u,s){return u.stats[s];}
+const G={meta:loadMeta(),diff:"normal",party:[],run:null,level:1,gold:30,
+  heroes(){return this.party.filter(Boolean);},
+  stat(u,s){return u.stats[s]+(u._buff?.[s]||0);}};
+function energyMax(u){return Math.max(2,Math.floor(G.stat(u,"DEX")/5));}
+function newRun(){const order=shuffle(AREAS.map((a,i)=>i)).slice(0,9);
+  const nodes=order.map((ai,i)=>({area:ai,level:i+1,done:false}));
+  nodes.push({darklord:true,level:10,done:false});G.run={nodes,idx:0};G.level=1;G.gold=30;}
+function currentNode(){return G.run.nodes[G.run.idx];}
+const COLS=2,ROWS=6;let C=null;
+function startCombat(spec){
+  C={turn:1,phase:"player",units:[],sel:null,mode:null,act:null,log:[],over:false,boss:spec.boss,undo:null};
+  const hs=G.heroes().filter(h=>h.alive);
+  hs.forEach((h,i)=>{h.pos={col:i%2,row:4+Math.floor(i/2)};h.st=freshStatus();h.energy=energyMax(h);h._swing=false;resetUses(h);applyGlyphHooks(h);refreshSoak(h);});
+  spec.foes.forEach((f,i)=>{f.pos={col:i%2,row:Math.floor(i/2)};f.energy=energyMax(f);f._swing=false;refreshSoak(f);});
+  C.units=[...hs,...spec.foes];
+  if(G.diff==="easy")C.undo=snapshot();
+  renderCombat();
+}
+function resetUses(u){u.skillUses={};for(const k in u.skills){const S=SKILLS[k];if(S&&S.uses)u.skillUses[k]=S.uses;}u._smith=2;}
+function snapshot(){return JSON.stringify(C.units.map(u=>({id:u.id,hp:u.hp,pos:u.pos,st:u.st,energy:u.energy,soak:u.soak,alive:u.alive,skillUses:u.skillUses,_swing:u._swing})));}
+function restoreSnap(s){JSON.parse(s).forEach(d=>{const u=C.units.find(x=>x.id===d.id);if(u)Object.assign(u,d);});}
+function unitAt(c,r){return C.units.find(u=>u.alive&&u.pos&&u.pos.col===c&&u.pos.row===r);}
+function dist(a,b){return Math.abs(a.pos.col-b.pos.col)+Math.abs(a.pos.row-b.pos.row);}
+function alliesOf(u){return C.units.filter(x=>x.alive&&x.side===u.side);}
+function enemiesOf(u){return C.units.filter(x=>x.alive&&x.side!==u.side);}
+function refreshSoak(u){let s=(u._gSoak||0);["head","body","feet"].forEach(k=>{const it=u.gear[k];if(it&&it.soak)s+=it.soak;});s+=u.st.armorBuff||0;if(u.st.sunder)s=Math.max(0,s-u.st.sunder.amt);u.soak=s;}
+G.log=t=>{C.log.unshift(t);if(C.log.length>40)C.log.pop();};
+G.refreshSoak=refreshSoak;
+G.weaponHit=function(a,t,div,thrown,multOverride,forceCrit){
+  const w=a.gear.hand1;if(!w){G.dealDamage(a,t,5,{});return;}
+  const sdiv=div||5,statKey=(w.kind==="ranged"||thrown)?"DEX":"STR";
+  const scale=Math.floor(G.stat(a,statKey)/sdiv)*(w.cost||1);
+  let dmg=w.base+scale,mult=multOverride||1,crit=forceCrit||rollCrit(a);
+  if(crit)mult*=1.5;dmg=Math.round(dmg*mult*blessMult(a));
+  G.dealDamage(a,t,dmg,{pierce:w.pierce?w.base:0,crit,label:w.name});
+  if(!t.alive)return;
+  if(a._gBurn)G.applyBurn(t,a._gBurn);
+  if(a._gBleed)G.applyBleed(t,a._gBleed);
+  if(a._gPoison)G.applyPoison(t,a._gPoison.dmg,a._gPoison.rounds);
+  if(a._chillHit)G.applyChill(t,2);
+  if(a._coat){G.applyPoison(t,a._coat.dmg,a._coat.rounds);if(--a._coatHits<=0)a._coat=null;}
+};
+G.spellHit=function(a,t,dmg){let m=blessMult(a),crit=rollCrit(a);if(crit)m*=1.5;if(dmg>0)G.dealDamage(a,t,Math.round(dmg*m),{crit,label:"spell"});};
+function blessMult(a){if(a.st.bless&&a.st.bless.hits>0){const m=1+a.st.bless.pct/100;if(--a.st.bless.hits<=0)a.st.bless=null;return m;}return 1;}
+function rollCrit(a){return Math.random()*100<(G.stat(a,"LCK")/3);}
+G.dealDamage=function(a,t,amount,opt){opt=opt||{};
+  let target=t;const grd=C.units.find(u=>u.alive&&u.st.guard&&u.st.guard.ward===t.id&&u.id!==t.id);
+  if(grd){target=grd;amount=Math.max(0,amount-Math.floor(G.stat(grd,"VIT")/grd.st.guard.div));G.log(`<span style="color:#9fb0c4">${grd.name} intercepts.</span>`);}
+  const pierce=opt.pierce||0,soakable=Math.max(0,amount-pierce),ab=Math.min(target.soak,soakable);
+  target.soak-=ab;applyHP(a,target,(soakable-ab)+pierce,opt);
+};
+G.dealRaw=function(a,t,dmg,label,ignoreSoak){if(ignoreSoak){applyHP(a,t,dmg,{label});return;}const ab=Math.min(t.soak,dmg);t.soak-=ab;applyHP(a,t,dmg-ab,{label});};
+function applyHP(a,t,dmg,opt){dmg=Math.max(0,Math.round(dmg));t.hp-=dmg;
+  G.log(`<span style="color:#e6a45a">${a?a.name+" → ":""}${t.name} −${dmg}${opt&&opt.crit?' (crit!)':''}</span>`);
+  if(t.hp<=0){t.hp=0;t.alive=false;G.log(`<span style="color:#e06868">${t.name} falls.</span>`);}}
+G.heal=function(a,t,amt){if(!t.alive)return;amt=Math.round(amt);t.hp=Math.min(t.maxhp,t.hp+amt);G.log(`<span style="color:#8fd07a">${t.name} +${amt} HP</span>`);
+  if(a&&a.gear&&a.gear.hand2&&a.gear.hand2.key==="censer")G.adjacentAllies(t).forEach(x=>{x.hp=Math.min(x.maxhp,x.hp+2*G.level);});};
+G.applyBurn=(t,n)=>{t.st.burn+=n;};
+G.applyBleed=(t,n)=>{t.st.bleed+=n;};
+G.applyChill=(t,n)=>{t.st.chill+=n;G.log(`<span class="muted">${t.name} gains ${n} Chill (${t.st.chill}).</span>`);};
+G.applyPoison=(t,dmg,rounds)=>{t.st.poison={dmg,rounds};};
+G.applySunder=(t,amt,rounds)=>{t.st.sunder={amt,rounds};refreshSoak(t);};
+G.applyStun=(t,n)=>{if(n>0)t.st.stun=Math.max(t.st.stun,n);};
+G.purify=(t,n,full)=>{const s=t.st;let done=0;
+  for(const k of["poison","sunder","burn","bleed","chill","stun"]){if(done>=n&&!full)break;
+    if((k==="poison"||k==="sunder")&&s[k]){s[k]=null;done++;}
+    else if((k==="burn"||k==="bleed"||k==="chill")&&s[k]>0){s[k]=full?0:Math.max(0,s[k]-1);done++;}
+    else if(k==="stun"&&s.stun>0){s.stun=0;done++;}}
+  s.frozen=false;refreshSoak(t);G.log(t.name+" is purified.");};
+G.afflicted=t=>{const s=t.st;return s.burn>0||s.bleed>0||s.chill>0||!!s.poison||!!s.sunder||s.stun>0||s.frozen;};
+G.behind=t=>unitAt(t.pos.col,t.pos.row+(t.side==="foe"?1:-1));
+G.adjacentAllies=u=>alliesOf(u).filter(x=>x.id!==u.id&&dist(x,u)===1);
+G.adjacentEnemiesOf=(a,t)=>enemiesOf(a).filter(x=>x.id!==t.id&&dist(x,t)===1);
+G.cleaveTargets=(t,r)=>{const o=t.pos.col===0?1:0,out=[t];const s=unitAt(o,t.pos.row);if(s&&s.side===t.side)out.push(s);
+  if(r>=3){const b=G.behind(t);if(b)out.push(b);const b2=unitAt(o,t.pos.row+(t.side==="foe"?1:-1));if(b2&&b2.side===t.side)out.push(b2);}return out;};
+G.aoeAt=(t,a,fn,rad)=>{enemiesOf(a).forEach(x=>{if(dist(x,t)<=rad)fn(x);});};
+G.heroesAlive=()=>C.units.filter(u=>u.alive&&u.side==="hero");
+function startTurn(u){const s=u.st;
+  if(s.poison){const d=Math.max(0,s.poison.dmg-Math.floor(G.stat(u,"VIT")/5));if(d>0){applyHP(null,u,d);G.log(`<span class="muted">${u.name} suffers ${d} poison.</span>`);}if(--s.poison.rounds<=0)s.poison=null;}
+  if(s.burn>0){applyHP(null,u,s.burn);G.log(`<span class="muted">${u.name} burns ${s.burn}.</span>`);s.burn=Math.max(0,s.burn-1);}
+  if(s.bleed>0){G.dealRaw(null,u,s.bleed,"bleed");G.log(`<span class="muted">${u.name} bleeds ${s.bleed} (turn start).</span>`);s.bleed=Math.max(0,s.bleed-1);}
+  if(s.sunder){if(s.sunder.rounds<99&&--s.sunder.rounds<=0)s.sunder=null;refreshSoak(u);}
+  if(!u.alive)return{act:false,dead:true};
+  const em=energyMax(u);
+  if(s.chill>=em){s.frozen=true;s.chill=0;u.energy=0;G.log(`<span class="muted">${u.name} is Frozen — loses the round.</span>`);return{act:false,reason:"frozen"};}
+  s.frozen=false;
+  u.energy=Math.max(0,em-s.chill);
+  if(s.chill>0)s.chill=Math.max(0,s.chill-1);
+  if(s.stun>0){s.stun--;u.energy=0;G.log(`<span class="muted">${u.name} is stunned — loses the round.</span>`);return{act:false,reason:"stunned"};}
+  return{act:true};}
+function bleedOnMove(u){if(u.st.bleed>0){G.dealRaw(null,u,u.st.bleed,"bleed");G.log(`<span class="muted">${u.name} tears ${u.st.bleed} (moved).</span>`);}}
+function selectHero(h){if(h.side!=="hero"||!h.alive)return;C.sel=h;C.mode=null;C.act=null;renderCombat();}
+function chooseAction(mode,data){const d=(data===undefined?null:data);if(C.mode===mode&&C.act===d){C.mode=null;C.act=null;}else{C.mode=mode;C.act=d;}renderCombat();}
+function tilesForAction(){const h=C.sel;if(!h||C.phase!=="player")return[];const out=[];
+  if(C.mode==="move"){[[0,1],[0,-1],[1,0],[-1,0]].forEach(([dc,dr])=>{const c=h.pos.col+dc,r=h.pos.row+dr;if(c>=0&&c<COLS&&r>=0&&r<ROWS&&!unitAt(c,r))out.push({col:c,row:r,kind:"move"});});return out;}
+  if(C.mode==="attack"){const w=h.gear.hand1,reach=w?w.reach:1;enemiesOf(h).forEach(u=>{if(dist(h,u)<=reach)out.push({col:u.pos.col,row:u.pos.row,kind:"tgt"});});return out;}
+  if(C.mode==="smith"){alliesOf(h).forEach(u=>out.push({col:u.pos.col,row:u.pos.row,kind:"tgt"}));return out;}
+  if(C.mode==="skill"){const S=SKILLS[C.act];
+    if(S.target==="self"){out.push({col:h.pos.col,row:h.pos.row,kind:"tgt"});return out;}
+    if(S.target==="ally"){alliesOf(h).forEach(u=>out.push({col:u.pos.col,row:u.pos.row,kind:"tgt"}));return out;}
+    const reach=(S.ranged||S.thrown)?99:(S.reach||1),minR=S.minRange||0;
+    enemiesOf(h).forEach(u=>{const d=dist(h,u);if(d>=Math.max(1,minR)&&d<=reach)out.push({col:u.pos.col,row:u.pos.row,kind:"tgt"});});return out;}
+  if(C.mode==="item"){const it=h.inv[C.act];if(it.sub==="potion"){alliesOf(h).forEach(u=>out.push({col:u.pos.col,row:u.pos.row,kind:"tgt"}));}else if(it.sub==="poison"){out.push({col:h.pos.col,row:h.pos.row,kind:"tgt"});}else{enemiesOf(h).forEach(u=>out.push({col:u.pos.col,row:u.pos.row,kind:"tgt"}));}return out;}
+  return out;}
+function spend(u,e){u.energy-=e;}
+function afterAction(){C.act=null;C.mode=null;C.units=C.units.filter(u=>u.alive||u.side==="hero");if(checkEnd())return;renderCombat();}
+function doAttack(h,t){const w=h.gear.hand1;let cost=w?(w.cost||1):1;if(w&&w.light&&!h._swing){cost=0;h._swing=true;}
+  if(h.energy<cost){flash("Not enough energy.");return;}spend(h,cost);
+  if(w&&w.focus==="wand"){G.applyBurn(t,h.level);G.log(h.name+"'s wand sears "+t.name+".");G.spellHit(h,t,0);}else G.weaponHit(h,t);
+  afterAction();}
+function doSkill(h,key,t){const S=SKILLS[key],r=h.skills[key];if(h.energy<S.cost){flash("Not enough energy.");return;}
+  if(S.uses&&(h.skillUses[key]||0)<=0){flash("No uses left.");return;}spend(h,S.cost);if(S.uses)h.skillUses[key]--;S.use(G,h,t,r);afterAction();}
+function doItem(h,idx,t){const it=h.inv[idx];if(!it)return;if(h.energy<1){flash("Not enough energy.");return;}spend(h,1);
+  if(it.sub==="potion")G.heal(h,t,it.heal);
+  else if(it.sub==="poison"){h._coat={dmg:it.dmg,rounds:it.rounds};h._coatHits=it.rounds;G.log(h.name+" coats their weapon.");}
+  else if(it.sub==="molotov"){G.aoeAt(t,h,x=>{G.dealRaw(h,x,it.dmg,"molotov",true);G.applyBurn(x,Math.ceil(it.dmg/3));},1);G.log(h.name+" hurls a molotov!");}
+  h.inv.splice(idx,1);afterAction();}
+function doSmith(h,t){if((h._smith||0)<=0){flash("No uses left.");return;}if(h.energy<1){flash("Not enough energy.");return;}spend(h,1);h._smith--;t.st.armorBuff+=5;refreshSoak(t);G.log(h.name+" plates "+t.name+" (+5 soak).");afterAction();}
+function raiseShield(h){const sh=h.gear.hand2;if(!sh||sh.type!=="shield")return;if(h.energy<1){flash("Not enough energy.");return;}spend(h,1);h.st.armorBuff+=sh.soak;refreshSoak(h);G.log(h.name+" raises "+sh.name+" (+"+sh.soak+" soak).");renderCombat();}
+function clickCell(col,row){const h=C.sel;if(!h||C.phase!=="player")return;
+  const tiles=tilesForAction(),tile=tiles.find(t=>t.col===col&&t.row===row);if(!tile)return;
+  if(C.mode==="move"){if(h.energy<1){flash("No energy to move.");return;}h.pos={col,row};bleedOnMove(h);spend(h,1);afterAction();return;}
+  const u=unitAt(col,row);if(!u&&C.mode!=="move")return;
+  if(C.mode==="attack")doAttack(h,u);
+  else if(C.mode==="smith")doSmith(h,u);
+  else if(C.mode==="skill")doSkill(h,C.act,u);
+  else if(C.mode==="item")doItem(h,C.act,u);}
+function cellClick(col,row){if(!C||C.over||C.phase!=="player")return;clickCell(col,row);}
+function selectHeroById(id){const u=C.units.find(x=>x.id===id&&x.alive);if(u)selectHero(u);}
+function unitClick(id){if(!C||C.over||C.phase!=="player")return;const u=C.units.find(x=>x.id===id&&x.alive);if(!u)return;
+  if(C.mode){const tile=tilesForAction().find(t=>t.col===u.pos.col&&t.row===u.pos.row);
+    if(tile){clickCell(u.pos.col,u.pos.row);return;}
+    if(u.side==="hero"){selectHero(u);return;} return;}
+  if(u.side==="hero")selectHero(u);}
+function undoTurn(){if(C.undo){restoreSnap(C.undo);C.sel=null;C.mode=null;flash("Round reset.");renderCombat();}}
+function endPlayerTurn(){if(C.over)return;C.phase="enemy";C.sel=null;C.mode=null;renderCombat();setTimeout(enemyTurn,380);}
+function enemyTurn(){const foes=C.units.filter(u=>u.alive&&u.side==="foe");let i=0;
+  (function step(){
+    if(i>=foes.length){endEnemyTurn();return;}
+    const f=foes[i++];if(!f.alive){step();return;}
+    const up=startTurn(f);
+    if(!f.alive){renderCombat();return setTimeout(step,240);}
+    if(!up.act){renderCombat();return setTimeout(step,280);}
+    f._swing=false;maybeSummon(f);
+    if(f.tmpl&&f.tmpl.regen&&f.st.burn<=0){f.hp=Math.min(f.maxhp,f.hp+Math.ceil(f.maxhp*0.08));G.log(`<span class="muted">${f.name} regenerates.</span>`);}
+    aiAct(f);if(checkEnd())return;renderCombat();setTimeout(step,340);
+  })();}
+function maybeSummon(f){if(!f._isBoss||!f.tmpl)return;const t=f.tmpl;if(!t.summon)return;
+  if(t.summon.every){f._sumT=(f._sumT||0)+1;if(f._sumT%t.summon.every!==0)return;}
+  else{if(f.hp>f.maxhp*0.5||f._summoned)return;f._summoned=true;}
+  let placed=0,n=t.summon.n||2;
+  for(let r=0;r<ROWS&&placed<n;r++)for(let c=0;c<COLS&&placed<n;c++)if(!unitAt(c,r)){const m=makeFoe(t.summon,G.level);m.pos={col:c,row:r};m.energy=energyMax(m);refreshSoak(m);C.units.push(m);placed++;}
+  if(placed)G.log(`<span style="color:#e06868">${f.name} summons reinforcements!</span>`);}
+function aiAct(f){let loops=0;
+  while(f.energy>0&&loops++<6){
+    const heroes=C.units.filter(u=>u.alive&&u.side==="hero");if(!heroes.length)return;
+    if(f.cls==="Cleric"&&f.skills.mend){const hurt=alliesOf(f).filter(x=>x.hp<x.maxhp*0.6).sort((a,b)=>a.hp-b.hp)[0];if(hurt&&f.energy>=1){f.energy--;SKILLS.mend.use(G,f,hurt,f.skills.mend);continue;}}
+    const t=heroes.slice().sort((a,b)=>dist(f,a)-dist(f,b)||a.hp-b.hp)[0];
+    const w=f.gear.hand1,reach=w?w.reach:1;
+    if(f.tmpl&&f.tmpl.breath&&f.energy>=2&&Math.random()<0.5){f.energy-=2;enemiesOf(f).forEach(x=>{G.spellHit(f,x,8);G.applyChill(x,3);});G.log(`<span style="color:#e06868">${f.name} breathes frost!</span>`);continue;}
+    if(f.tmpl&&f.tmpl.disease&&f.energy>=1&&Math.random()<0.5){f.energy--;G.applyPoison(t,4,3);G.log(`${f.name} spreads spores on ${t.name}.`);continue;}
+    if(dist(f,t)>reach){if(!stepToward(f,t))break;continue;}
+    let cost=w?(w.cost||1):1;if(w&&w.light&&!f._swing){cost=0;f._swing=true;}if(f.energy<cost)break;f.energy-=cost;
+    if(w&&w.focus==="wand"){G.applyBurn(t,f.level);G.spellHit(f,t,0);}
+    else if(f.cls==="Wizard"&&f.skills.magic_bolt)SKILLS.magic_bolt.use(G,f,t,f.skills.magic_bolt);
+    else G.weaponHit(f,t);
+  }}
+function stepToward(f,t){const opts=[[0,1],[0,-1],[1,0],[-1,0]].map(([dc,dr])=>({col:f.pos.col+dc,row:f.pos.row+dr}))
+    .filter(p=>p.col>=0&&p.col<COLS&&p.row>=0&&p.row<ROWS&&!unitAt(p.col,p.row));
+  if(!opts.length)return false;
+  opts.sort((a,b)=>(Math.abs(a.col-t.pos.col)+Math.abs(a.row-t.pos.row))-(Math.abs(b.col-t.pos.col)+Math.abs(b.row-t.pos.row)));
+  f.pos=opts[0];bleedOnMove(f);return true;}
+function endEnemyTurn(){C.turn++;C.phase="player";
+  C.units.filter(u=>u.alive&&u.side==="hero").forEach(h=>{h.st.guard=null;h.st.armorBuff=0;refreshSoak(h);
+    startTurn(h);if(!h.alive)return;refreshSoak(h);h._swing=false;resetUses(h);});
+  C.units=C.units.filter(u=>u.alive);if(checkEnd())return;
+  if(G.diff==="easy")C.undo=snapshot();C.sel=null;C.mode=null;renderCombat();}
+function checkEnd(){const foes=C.units.filter(u=>u.side==="foe"&&u.alive),heroes=C.units.filter(u=>u.side==="hero"&&u.alive);
+  if(!foes.length){C.over=true;setTimeout(winCombat,480);return true;}
+  if(!heroes.length){C.over=true;setTimeout(()=>screenDefeat(G.diff==="hard"),480);return true;}return false;}
+function buildEncounter(boss){const node=currentNode();
+  if(node.darklord){const lord=makeFoe(DARKLORD,G.level);lord._isBoss=true;
+    return{foes:[lord,...DARKLORD.escort.map(e=>makeFoe(e,G.level))].slice(0,10),boss:true};}
+  const A=AREAS[node.area];
+  if(boss){const b=makeFoe(A.boss,G.level);b._isBoss=true;const foes=[b];
+    if(A.boss.escort)for(let i=0;i<A.boss.escort.n;i++)foes.push(makeFoe(A.boss.escort,G.level));return{foes,boss:true};}
+  const[lo,hi]=A.count,n=lo+rnd(hi-lo+1),foes=[];for(let i=0;i<n;i++)foes.push(makeFoe(A.mob,G.level));return{foes,boss:false};}
+function enterNode(){G.level=currentNode().level;startCombat(buildEncounter(false));}
+function startBoss(){G.level=currentNode().level;startCombat(buildEncounter(true));}
+function winCombat(){
+  if(G.diff!=="hard"){G.party.forEach(h=>{if(!h.alive){h.alive=true;h.hp=Math.max(1,Math.round((50+G.stat(h,"VIT")*h.level)*0.5));}});}
+  G.heroes().forEach(h=>{h.st=freshStatus();h._coat=null;h.maxhp=50+G.stat(h,"VIT")*h.level+(h._gHP||0);h.hp=Math.min(h.hp,h.maxhp);});
+  if(C.boss)afterBoss();else afterTrash();}
+function afterTrash(){rollLoot(()=>goBossIntro());}
+function afterBoss(){G.party.forEach(h=>{if(h.alive){h.level++;applyGlyphHooks(h);h.hp=h.maxhp;h._skillPts=(h._skillPts||0)+1;h._statPts=(h._statPts||0)+2;}});
+  currentNode().done=true;checkMetaUnlocks();
+  rollLoot(()=>manageScreen(()=>shopScreen(()=>{G.run.idx++;if(G.run.idx>=G.run.nodes.length)screenVictory();else screenMap();}),true));}
+function goBossIntro(){const node=currentNode();const name=node.darklord?DARKLORD.name:AREAS[node.area].name;
+  render(`<div class="panel"><div class="eyebrow">Area ${node.level}</div><h2 class="dsp">${name} — Boss</h2>
+    <p class="muted small">${node.darklord?"The final formation stands before you: plated knights, archers, a court wizard, and the Dark Lord himself.":AREAS[node.area].check}</p>
+    <div class="row"><button class="btn" onclick="startBoss()">Face the boss</button></div></div>`);}
+function rollRarity(area,lck){const tbl=LOOT_TABLE[area];let r=Math.random()*100,idx=0;
+  for(let i=0;i<tbl.length;i++){if(r<tbl[i]){idx=i;break;}r-=tbl[i];}
+  if(Math.random()*100<lck/3&&idx<RARITIES.length-1)idx++;return RARITIES[idx];}
+function randomItem(rarity){const roll=rnd(100);
+  if(roll<22){const w=weaponItem(pick(Object.keys(WEAPONS).filter(k=>k!=="wand")));w.rarity=rarity;w.sockets=[];return w;}
+  if(roll<40){const k=pick(Object.keys(BODY));return{type:"armor",slot:"body",key:k,...BODY[k],rarity,sockets:[]};}
+  if(roll<52){const s=shieldItem(pick(Object.keys(SHIELDS)));s.rarity=rarity;s.sockets=[];return s;}
+  if(roll<66){const k=pick(Object.keys(FEET));return{type:"armor",slot:"feet",key:k,...FEET[k],rarity,sockets:[]};}
+  if(roll<76){const k=pick(Object.keys(HEAD));return{type:"armor",slot:"head",key:k,...HEAD[k],rarity,sockets:[]};}
+  if(roll<88){const gk=pick(Object.keys(GLYPHS));return{type:"glyph",key:gk,...GLYPHS[gk],rarity};}
+  if(roll<95)return poisonBottle(rarity);
+  return Math.random()<0.5?molotov(rarity):potion(rarity);}
+let LOOT=null;
+function rollLoot(done){const area=currentNode().level,lck=Math.max(...G.heroes().map(h=>G.stat(h,"LCK")));
+  const five=[];for(let i=0;i<5;i++)five.push(randomItem(rollRarity(area,lck)));LOOT={items:five,taken:[],done};lootScreen();}
+function lootScreen(){const L=LOOT;let h=`<div class="panel"><div class="eyebrow">Spoils</div><h2 class="dsp">Choose 3 of 5</h2><p class="muted small">Picked ${L.taken.length}/3</p><div>`;
+  L.items.forEach((it,i)=>{const t=L.taken.includes(i);
+    h+=`<div class="loot-it" style="${t?'opacity:.4':''}"><div><span class="tag" style="color:${rarColor(it.rarity)}">${it.rarity}</span> <b>${it.name}</b><div class="muted small">${itemDesc(it)}</div></div>
+      <button class="btn sm" ${t||L.taken.length>=3?'disabled':''} onclick="takeLoot(${i})">Take</button></div>`;});
+  h+=`</div><div class="row" style="margin-top:12px"><button class="btn" onclick="finishLoot()">Continue</button></div></div>`;render(h);}
+function takeLoot(i){if(LOOT.taken.length>=3||LOOT.taken.includes(i))return;LOOT.taken.push(i);G.party[0].inv.push(LOOT.items[i]);lootScreen();}
+function finishLoot(){const d=LOOT.done;LOOT=null;d();}
+let MANAGE_DONE=null;
+function manageScreen(done,levelup){MANAGE_DONE=done;render(manageHTML(levelup));}
+function manageHTML(levelup){let h=`<div class="panel"><div class="row spread"><div><div class="eyebrow">${levelup?'Area cleared':'The Company'}</div><h2 class="dsp">Manage</h2></div><div class="muted small">Gold: <b>${G.gold}</b></div></div>`;
+  G.party.forEach((u,i)=>h+=heroCard(u,i));
+  h+=`<div class="row" style="margin-top:12px"><button class="btn" onclick="MANAGE_DONE()">Continue</button></div></div>`;return h;}
+function refreshManage(){render(manageHTML(false));}
+function heroCard(u,i){const sp=u._statPts||0,sk=u._skillPts||0;
+  let h=`<div class="card"><div class="row spread"><div><b class="dsp" style="color:#fff">${u.name}</b> <span class="muted small">${u.race} ${u.cls} · Lv ${u.level}${u.alive?'':' · FALLEN'}</span></div><div class="muted small">HP ${u.hp}/${u.maxhp} · E ${energyMax(u)} · Mem ${Math.floor(G.stat(u,"FOC")/5)}</div></div>
+    <div class="statline" style="margin:8px 0">`;
+  STATNAMES.forEach(s=>{h+=`<div><b>${G.stat(u,s)}</b><span>${s}</span>${sp>0?`<button class="btn sm ghost" style="margin-top:4px;padding:1px 6px" onclick="raiseStat(${i},'${s}')">+</button>`:''}</div>`;});
+  h+=`</div>`;
+  if(sp>0)h+=`<div class="muted small">Stat points: ${sp}</div>`;
+  h+=`<div class="small" style="margin-top:6px"><b>Skills:</b> ${Object.keys(u.skills).map(k=>(SKILLS[k]?SKILLS[k].name:cap(k))+' r'+u.skills[k]).join(", ")||"—"}</div>`;
+  const profs=Object.keys(u.professions).filter(p=>u.professions[p]);
+  if(profs.length)h+=`<div class="small"><b>Trades:</b> ${profs.map(p=>PROFESSIONS[p].name+' r'+u.professions[p]).join(", ")}</div>`;
+  if(sk>0){h+=`<div class="muted small" style="margin-top:6px">Skill points: ${sk}${G.diff==="hard"?' (Hard: rank costs 5 stat pts)':''}</div><div class="row" style="margin-top:4px">`;
+    Object.keys(u.skills).forEach(k=>{if(u.skills[k]<5)h+=`<button class="btn sm ghost" onclick="rankSkill(${i},'${k}')">▲ ${SKILLS[k].name}</button>`;});
+    learnable(u).forEach(k=>h+=`<button class="btn sm" onclick="learnSkill(${i},'${k}')">Learn ${SKILLS[k].name}</button>`);
+    Object.keys(PROFESSIONS).forEach(pk=>{const P=PROFESSIONS[pk];if(G.stat(u,P.req[0])>=P.req[1]&&(u.professions[pk]||0)<5)h+=`<button class="btn sm ghost" onclick="rankProf(${i},'${pk}')">⚒ ${P.name}${u.professions[pk]?' r'+u.professions[pk]:''}</button>`;});
+    h+=`</div>`;}
+  h+=equipBlock(u,i);h+=`</div>`;return h;}
+function learnable(u){const t1=BASIC_SKILLS.filter(k=>{const S=SKILLS[k];return !u.skills[k]&&S.cls===u.cls&&G.stat(u,S.req[0])>=S.req[1];});
+  const t2=Object.keys(SKILLS).filter(k=>{const S=SKILLS[k];return S.tier===2&&!u.skills[k]&&S.cls===u.cls&&G.stat(u,S.req[0])>=S.req[1]&&(!S.req2||G.stat(u,S.req2[0])>=S.req2[1]);});
+  return t1.concat(t2);}
+function payPoint(u){if(G.diff==="hard"){if((u._statPts||0)<5){flash("Hard: needs 5 stat points.");return false;}u._statPts-=5;return true;}if((u._skillPts||0)<=0){flash("No skill points.");return false;}u._skillPts--;return true;}
+function raiseStat(i,s){const u=G.party[i];if((u._statPts||0)<=0)return;u.stats[s]++;u._statPts--;applyGlyphHooks(u);refreshManage();}
+function rankSkill(i,k){const u=G.party[i];if(u.skills[k]>=5)return;if(!payPoint(u))return;u.skills[k]++;refreshManage();}
+function learnSkill(i,k){const u=G.party[i];if(Object.keys(u.skills).length>=Math.floor(G.stat(u,"FOC")/5)+(u.gear.hand2&&u.gear.hand2.key==="book"?1:0)){flash("No free Memory slot.");}if(!payPoint(u))return;u.skills[k]=1;refreshManage();}
+function rankProf(i,pk){const u=G.party[i];if(!payPoint(u))return;u.professions[pk]=(u.professions[pk]||0)+1;refreshManage();}
+function equipBlock(u,i){let h=`<div style="margin-top:8px"><div class="muted small"><b>Worn:</b> ${["head","body","feet","hand1","hand2"].map(s=>{const it=u.gear[s];return it?it.name+(it.sockets&&it.sockets.length?' ['+it.sockets.map(g=>GLYPHS[(g&&g.key)||g].name[0]).join('')+']':''):'—';}).join(" · ")}</div>`;
+  if(i===0&&G.party[0].inv.length){h+=`<div class="muted small" style="margin-top:6px"><b>Stash:</b></div>`;
+    G.party[0].inv.forEach((it,ii)=>{h+=`<div class="loot-it" style="margin-top:4px"><div><span class="tag" style="color:${rarColor(it.rarity)}">${it.rarity}</span> ${it.name} <span class="muted small">${itemDesc(it)}</span></div><div class="row">`;
+      if(it.type==="weapon"||it.type==="shield"||it.type==="armor")G.party.forEach((hh,j)=>h+=`<button class="btn sm ghost" onclick="equipItem(${ii},${j})">${hh.name.slice(0,4)}</button>`);
+      else if(it.type==="glyph")h+=`<button class="btn sm ghost" onclick="openSocket(${ii})">Socket</button>`;
+      else if(it.type==="consumable")G.party.forEach((hh,j)=>h+=`<button class="btn sm ghost" onclick="giveItem(${ii},${j})">→${hh.name.slice(0,4)}</button>`);
+      h+=`<button class="btn sm ghost" onclick="sellItem(${ii})">Sell ${sellPrice(it)}g</button></div></div>`;});}
+  h+=`</div>`;return h;}
+function equipItem(ii,j){const it=G.party[0].inv[ii],u=G.party[j];
+  if(it.gate&&G.stat(u,"VIT")<it.gate){flash("Needs VIT "+it.gate+".");return;}
+  if(it.req&&it.req.STR&&G.stat(u,"STR")<it.req.STR){flash("Needs STR "+it.req.STR+".");return;}
+  let slot=it.slot;if(it.type==="weapon"||it.type==="shield")slot=u.gear.hand1?(u.gear.hand2?"hand1":"hand2"):"hand1";
+  const old=u.gear[slot];u.gear[slot]=it;G.party[0].inv.splice(ii,1);if(old&&old.rarity)G.party[0].inv.push(old);
+  applyGlyphHooks(u);flash(it.name+" equipped.");refreshManage();}
+function giveItem(ii,j){const it=G.party[0].inv.splice(ii,1)[0];G.party[j].inv.push(it);flash("Given.");refreshManage();}
+function sellItem(ii){const it=G.party[0].inv.splice(ii,1)[0];G.gold+=sellPrice(it);flash("Sold "+sellPrice(it)+"g.");refreshManage();}
+function sellPrice(it){const base=PRICE[it.rarity]||3,tr=Math.max(0,...G.party.map(h=>h.professions.trader||0));return Math.max(1,Math.round(base*(0.25+0.05*tr)));}
+let SOCK=null;
+function openSocket(ii){SOCK=ii;const it=G.party[0].inv[ii],on=it.on,smith=G.party.some(p=>p.professions.blacksmithing);
+  let h=`<div class="panel"><div class="eyebrow">Blacksmith</div><h2 class="dsp">Socket ${it.name}</h2><p class="muted small">${it.effect}. ${smith?'Party blacksmith sockets free.':'Town smith charges 5g.'}</p>`,any=false;
+  G.party.forEach((u,hi)=>["head","body","feet","hand1","hand2"].forEach(sl=>{const g=u.gear[sl];if(!g)return;
+    const fits=(on==="weapon"&&g.type==="weapon")||(on==="armor"&&(g.type==="armor"||g.type==="shield"));if(!fits)return;
+    const capN=SLOTS[g.rarity]||1,used=(g.sockets||[]).length;
+    if(used<capN){any=true;h+=`<div class="loot-it"><div>${u.name}: <b>${g.name}</b> <span class="muted small">${used}/${capN}</span></div><button class="btn sm" onclick="doSocket(${hi},'${sl}')">Socket</button></div>`;}}));
+  if(!any)h+=`<p class="muted">No free sockets of the right type. Higher-rarity gear has more sockets.</p>`;
+  h+=`<div class="row" style="margin-top:10px"><button class="btn ghost" onclick="refreshManage()">Back</button></div></div>`;render(h);}
+function doSocket(hi,sl){const it=G.party[0].inv[SOCK],u=G.party[hi],g=u.gear[sl],smith=G.party.some(p=>p.professions.blacksmithing);
+  if(!smith){if(G.gold<5){flash("Need 5 gold.");return;}G.gold-=5;}g.sockets=g.sockets||[];g.sockets.push({key:it.key,rarity:it.rarity});G.party[0].inv.splice(SOCK,1);applyGlyphHooks(u);flash("Socketed.");refreshManage();}
+let SHOP=null;
+function shopScreen(done){const area=currentNode().level,stock=[];
+  for(let i=0;i<5;i++)stock.push(randomItem(RARITIES[clamp(rnd(Math.min(6,2+Math.floor(area/2))),0,5)]));
+  if(G.party.some(h=>h.professions.alchemy))stock.push(poisonBottle(pick(["common","uncommon","rare"])));
+  SHOP={stock,done};drawShop();}
+function drawShop(){let h=`<div class="panel"><div class="eyebrow">Wayside Merchant</div><h2 class="dsp">Shop</h2><p class="muted small">Gold: <b>${G.gold}</b></p>`;
+  SHOP.stock.forEach((it,i)=>{if(!it)return;const p=PRICE[it.rarity];
+    h+=`<div class="shop-it"><div><span class="tag" style="color:${rarColor(it.rarity)}">${it.rarity}</span> <b>${it.name}</b> <span class="muted small">${itemDesc(it)}</span></div><button class="btn sm" ${G.gold<p?'disabled':''} onclick="buyItem(${i})">Buy ${p}g</button></div>`;});
+  h+=`<div class="row" style="margin-top:12px"><button class="btn ghost" onclick="openManageFromShop()">Manage party</button><button class="btn" onclick="leaveShop()">Leave</button></div></div>`;render(h);}
+function buyItem(i){const it=SHOP.stock[i];if(!it)return;const p=PRICE[it.rarity];if(G.gold<p)return;G.gold-=p;G.party[0].inv.push(it);SHOP.stock[i]=null;flash("Bought "+it.name+".");drawShop();}
+function openManageFromShop(){manageScreen(()=>drawShop(),false);}
+function leaveShop(){const d=SHOP.done;SHOP=null;d();}
+function checkMetaUnlocks(){if(G.diff==="easy")return;const m=G.meta;let ch=false;
+  G.party.forEach(h=>{if((h.professions.blacksmithing||0)>=5&&!m.unlocks.dwarf){m.unlocks.dwarf=true;ch=true;flash("Unlocked: Dwarf race!");}
+    if(G.stat(h,"LCK")>=50&&!m.unlocks.bard){m.unlocks.bard=true;ch=true;flash("Unlocked: Bard class!");}});
+  if(ch)saveMeta(m);}
+function rarColor(r){return{common:"#6b7280",uncommon:"#3a7d44",rare:"#2f6fb0",epic:"#7a4fb0",legendary:"#b8862b",artifact:"#b23a3a"}[r]||"#6b7280";}
+function itemDesc(it){
+  if(it.type==="weapon")return `${it.base} base · ${it.cost}e · reach ${it.reach>9?'∞':it.reach}${it.pierce?' · Pierce':''}${it.req&&it.req.STR?' · STR '+it.req.STR:''}`;
+  if(it.type==="armor")return `${it.soak} soak${it.gate?` · VIT ${it.gate}`:''}`;
+  if(it.type==="shield")return `${it.soak} soak/use${it.gate?` · VIT ${it.gate}`:''}`;
+  if(it.type==="glyph")return glyphScale(it.key,it.rarity).txt;
+  if(it.sub==="poison")return `coat weapon: ${it.dmg}×${it.rounds} poison`;
+  if(it.sub==="molotov")return `${it.dmg} fire AoE + burn`;
+  if(it.sub==="potion")return `heal ${it.heal}`;
+  return "";}
+function renderCombat(){const node=currentNode();
+  let h=`<div class="row spread" style="margin-bottom:8px"><div><span class="eyebrow">Area ${node.level} · ${node.darklord?DARKLORD.name:AREAS[node.area].name}</span>
+    <div class="dsp" style="color:var(--bone);font-size:20px">${C.boss?'Boss Battle':'Skirmish'} · Round ${C.turn}</div></div>
+    <div class="row">${G.diff==="easy"?'<button class="btn ghost sm" onclick="undoTurn()">Undo Round</button>':''}<button class="btn sm" ${C.phase!=="player"?'disabled':''} onclick="endPlayerTurn()">End Turn</button></div></div>`;
+  const tiles=tilesForAction();
+  h+=`<div class="board">`;
+  for(let row=0;row<ROWS;row++)for(let col=0;col<COLS;col++){const u=unitAt(col,row),tile=tiles.find(t=>t.col===col&&t.row===row);
+    let cls="cell";if(tile&&tile.kind==="move")cls+=" movetgt";if(tile&&tile.kind==="tgt")cls+=" tgt";
+    h+=`<div class="${cls}" onclick="cellClick(${col},${row})">${u?unitHTML(u):""}</div>`;}
+  h+=`</div>`+actionBar()+`<div class="log" style="margin-top:10px">`+C.log.map(l=>`<p>${l}</p>`).join("")+`</div>`;
+  render(h);}
+function unitHTML(u){const sel=(C.sel&&C.sel.id===u.id)?" sel":"";const pct=Math.max(0,u.hp/u.maxhp*100);const s=u.st;let b="";
+  if(s.frozen)b+='<span class="bdg b-freeze">FROZEN</span>';
+  else if(s.chill>=energyMax(u))b+=`<span class="bdg b-freeze">❄FREEZE</span>`;
+  else if(s.chill>0)b+=`<span class="bdg b-chill">❄${s.chill}</span>`;
+  if(s.stun>0)b+=`<span class="bdg b-stun">DAZED</span>`;
+  if(s.burn>0)b+=`<span class="bdg b-burn">🔥${s.burn}</span>`;
+  if(s.bleed>0)b+=`<span class="bdg b-bleed">🩸${s.bleed}</span>`;
+  if(s.poison)b+=`<span class="bdg b-poison">☠${s.poison.dmg}×${s.poison.rounds}</span>`;
+  if(s.sunder)b+='<span class="bdg b-sunder">SND</span>';
+  if(s.guard)b+='<span class="bdg b-guard">GRD</span>';
+  if(s.armorBuff>0)b+=`<span class="bdg b-armor">+${s.armorBuff}</span>`;
+  if(s.bless)b+=`<span class="bdg b-bless">+${s.bless.pct}%</span>`;
+  return `<div class="unit ${u.side==="hero"?"hero":"foe"}${sel}" onclick="event.stopPropagation();unitClick(${u.id})">
+    <div class="nm">${u.name}</div><div class="hp"><i style="width:${pct}%"></i></div>
+    ${u.side==="hero"?`<div class="en"><i style="width:${u.energy/energyMax(u)*100}%"></i></div>`:''}
+    <div class="muted" style="font-size:10px">${u.hp}/${u.maxhp}${u.soak?` · 🛡${u.soak}`:''}</div>
+    <div class="badges">${b}</div></div>`;}
+function actionBar(){
+  if(C.phase!=="player")return `<div class="card" style="margin-top:10px"><span class="muted">The foes move…</span></div>`;
+  let h=`<div class="card" style="margin-top:10px"><div class="row" style="margin-bottom:8px">`;
+  C.units.filter(u=>u.side==="hero"&&u.alive).forEach(u=>h+=`<span class="pill ${C.sel&&C.sel.id===u.id?'on':''}" onclick="selectHeroById(${u.id})">${u.name} · E${u.energy}</span>`);
+  h+=`</div>`;const x=C.sel;
+  if(!x){h+=`<span class="muted small">Select a hero to act.</span></div>`;return h;}
+  if((x.energy||0)<=0){h+=`<span class="muted small">${x.name} has no energy this round (${x.st.frozen?'frozen':x.st.stun>0?'stunned':x.st.chill>0?'chilled':'spent'}). Select another hero or End Turn.</span></div>`;return h;}
+  h+=`<div class="actbar">`;
+  h+=`<span class="pill ${C.mode==='move'?'on':''}" onclick="chooseAction('move')">Move (1e)</span>`;
+  const w=x.gear.hand1;if(w){const lc=(w.light&&!x._swing)?0:(w.cost||1);h+=`<span class="pill ${C.mode==='attack'?'on':''}" onclick="chooseAction('attack')">Attack: ${w.name} (${lc}e)</span>`;}
+  const sh=x.gear.hand2;if(sh&&sh.type==="shield")h+=`<span class="pill" onclick="raiseShield(C.sel)">Raise ${sh.name} (1e)</span>`;
+  Object.keys(x.skills).forEach(k=>{const S=SKILLS[k];if(!S)return;const ul=S.uses?` ·${x.skillUses[k]||0}`:'';h+=`<span class="pill ${C.mode==='skill'&&C.act===k?'on':''}" onclick="chooseAction('skill','${k}')" title="${S.text(x.skills[k])}">${S.name} r${x.skills[k]} (${S.cost}e${ul})</span>`;});
+  if(x.professions.blacksmithing)h+=`<span class="pill ${C.mode==='smith'?'on':''}" onclick="chooseAction('smith')">Plate Ally (1e·${x._smith||0})</span>`;
+  (x.inv||[]).forEach((it,ii)=>{if(it.type==="consumable")h+=`<span class="pill ${C.mode==='item'&&C.act===ii?'on':''}" onclick="chooseAction('item',${ii})">${it.name} (1e)</span>`;});
+  h+=`</div>`;if(C.mode)h+=`<div class="muted small" style="margin-top:6px">${modeHint()} <span class="pill" style="padding:2px 8px" onclick="chooseAction(C.mode,C.act)">Cancel</span></div>`;h+=`</div>`;return h;}
+function modeHint(){if(C.mode==="move")return "Tap a blue tile.";if(C.mode==="attack")return "Tap a foe in range.";if(C.mode==="smith")return "Tap an ally to plate.";
+  if(C.mode==="skill"){const S=SKILLS[C.act];return `${S.name}: ${S.text(C.sel.skills[C.act])} — tap a ${S.target==='ally'?'ally':S.target==='self'?'self':'foe'}.`;}
+  if(C.mode==="item")return `${C.sel.inv[C.act].name}: tap a target.`;return "";}
+function screenTitle(){const m=G.meta;
+  render(`<div class="center" style="padding-top:30px"><div class="eyebrow">A party-tactics roguelite</div>
+    <h1 class="title">The March to the Dark Lord</h1><div class="rule"></div>
+    <p class="muted" style="max-width:560px;margin:0 auto 22px">Forge a company of four, descend through nine trials in shifting order, and break the Dark Lord's formation at the tenth gate. Set a status, then cash it in — that is the whole game.</p>
+    <div class="row" style="justify-content:center;margin-bottom:16px">
+      <button class="btn" onclick="chooseDiff('easy')">Easy · Undo</button>
+      <button class="btn" onclick="chooseDiff('normal')">Normal</button>
+      <button class="btn" onclick="chooseDiff('hard')">Hard · Permadeath</button></div>
+    <p class="muted small">${m.unlocks.dwarf?'✓ Dwarf unlocked  ':''}${m.unlocks.bard?'✓ Bard unlocked':''}</p>
+    <div class="row" style="justify-content:center;margin-top:8px"><button class="btn ghost" onclick="screenTutorial(0)">How to Play</button></div>
+    <p class="muted small" style="margin-top:22px">Difficulty changes the world's cruelty, never the rules of the fight.</p></div>`);}
+const TUTORIAL=[
+ {t:"The Basics",h:`<p><b>Your company of four</b> fights along a narrow corridor — your heroes start at the bottom, the foes at the top. Combat runs in <b>team phases</b>: move and act with every hero in any order you like, then press <b>End Turn</b> to let the foes move.</p>
+   <p style="margin-top:8px"><b>Energy</b> (the blue bar) is each hero's action budget for the round — about DEX ÷ 5. Moving one tile costs 1 energy; attacks cost their weapon's energy (light weapons' first swing each round is free); skills cost what their pill shows. A spent hero simply waits — select another, or End Turn.</p>
+   <p style="margin-top:8px"><b>The whole game is setup → payoff.</b> Apply a status with one hero, then cash it in with another: freeze a foe and Shatter it, set Burn and Combust it, stack Bleed and Rupture it.</p>
+   <p style="margin-top:8px"><b>Armour soak</b> (🛡) absorbs damage each round before HP is touched. Heavy weapons <b>Pierce</b> — their base damage ignores soak. Magic and damage-over-time also slip past armour, so a wall of plate has three answers.</p>`},
+ {t:"The Six Statuses",h:`<div class="grid">
+   <div class="card"><b style="color:var(--burn)">🔥 Burn</b><div class="small">Fire damage at the start of the victim's turn, then fades by 1. Detonate the whole stack with <i>Combustion</i>.</div></div>
+   <div class="card"><b style="color:var(--bleed)">🩸 Bleed</b><div class="small">Triggers at the start of the victim's turn <b>and</b> whenever it moves (willingly or shoved) — not on attacking. Detonate with <i>Rupture</i>.</div></div>
+   <div class="card"><b style="color:var(--poison)">☠ Poison</b><div class="small">A set amount of damage for a set number of rounds, reduced by VIT÷5 each tick. Re-applying restarts the timer. <i>Purify</i> wipes it.</div></div>
+   <div class="card"><b style="color:var(--frost)">❄ Chill / Freeze</b><div class="small">Chill lowers a unit's energy by that amount. If Chill ≥ their energy they <b>Freeze</b> — they lose one whole round, and afterward all Chill is gone.</div></div>
+   <div class="card"><b style="color:var(--sunder)">🪓 Sunder</b><div class="small">Cuts armour soak for a few rounds. Pure setup so a big hit lands clean.</div></div>
+   <div class="card"><b style="color:var(--stun)">💫 Stun / Daze</b><div class="small">The target loses their whole next action. <i>Bash</i> dazes a foe and strips their turn outright.</div></div></div>`},
+ {t:"Gear & Glyphs",h:`<p>Each hero wears five pieces: <b>head, body, feet,</b> and two <b>hands</b>. Hands hold a weapon plus either a second weapon, a <b>shield</b> (active soak you raise for 1 energy), or a caster <b>focus</b>. Heavier armour and shields need more <b>VIT</b>; heavy weapons need <b>STR 20</b>.</p>
+   <p style="margin-top:8px"><b>Glyphs</b> are socketed into gear by a Blacksmith (free if a party member knows Blacksmithing, else 5 gold in town). Rarer gear has more sockets (1 at common up to 6 at artifact), and <b>a glyph's power scales with its own rarity</b> — a rare Flame Glyph applies far more Burn than a common one. Flame/Razor/Venom ride your weapon hits; Stone and Vigor harden your armour.</p>
+   <p style="margin-top:8px"><b>Loot</b> drops five items after a fight — you keep three. Deeper areas and higher LCK pull richer rarities. Sell the rest in town; rank the <b>Trader</b> profession to sell for more, <b>Alchemy</b> to craft poison bottles, and <b>Blacksmithing</b> to socket free and plate allies mid-fight.</p>`},
+ {t:"The March",h:`<p>Nine themed areas appear in shifting order, then the <b>Dark Lord</b> at the tenth gate. Each area is a skirmish followed by a boss that tests one thing — an armour wall, a freeze, a regenerator you must Burn, a swarm you must out-race.</p>
+   <p style="margin-top:8px">Clear a boss to <b>level up</b>: spend stat points to raise stats (and meet skill gates), and skill points to rank or learn skills and trades. On <b>Easy</b> you can Undo a round; on <b>Normal</b> a fallen hero returns at half health after each fight; on <b>Hard</b> the dead stay dead and a skill point costs 5 stat points.</p>
+   <p style="margin-top:8px">Go break a formation.</p>`}
+];
+function screenTutorial(i){i=clamp(i,0,TUTORIAL.length-1);const p=TUTORIAL[i];
+  render(`<div class="panel"><div class="eyebrow">How to Play · ${i+1}/${TUTORIAL.length}</div><h2 class="dsp">${p.t}</h2>${p.h}
+    <div class="row spread" style="margin-top:16px"><button class="btn ghost" onclick="${i>0?`screenTutorial(${i-1})`:'screenTitle()'}">${i>0?'← Back':'Title'}</button>
+    <button class="btn" onclick="${i<TUTORIAL.length-1?`screenTutorial(${i+1})`:'screenTitle()'}">${i<TUTORIAL.length-1?'Next →':'Done'}</button></div></div>`);}
+function chooseDiff(d){G.diff=d;startCreation();}
+let CREATE=null;
+const DEFNAMES=["Bram","Sera","Iris","Doran","Kael","Mira","Tove","Rolf"];
+function startCreation(){CREATE={slot:0,heroes:[],draft:{name:"",race:"human",cls:"Fighter",raceSkill:null}};creationScreen();}
+function previewStats(d){const sp={...RACES[d.race].spread},add=CLASSES[d.cls].add;for(const k in add)sp[k]+=add[k];return sp;}
+function statMeets(p,S){if(p[S.req[0]]<S.req[1])return false;if(S.req2&&p[S.req2[0]]<S.req2[1])return false;return true;}
+function creationScreen(){const d=CREATE.draft,slot=CREATE.slot;
+  const races=Object.keys(RACES).filter(r=>RACES[r].free||(r==="dwarf"&&G.meta.unlocks.dwarf));
+  let h=`<div class="panel"><div class="eyebrow">Hero ${slot+1} of 4</div><h2 class="dsp">Forge a Hero</h2>
+    <label class="small">Name</label><br><input id="hn" value="${d.name||DEFNAMES[slot]}" style="width:220px;margin:6px 0 14px"><br>
+    <div class="small"><b>Class</b></div><div class="pick" style="margin:6px 0 14px">`;
+  Object.keys(CLASSES).forEach(c=>h+=`<div class="opt ${d.cls===c?'on':''}" onclick="setDraft('cls','${c}')"><b>${c}</b><div class="muted small">${CLASSES[c].hint}</div></div>`);
+  h+=`</div><div class="small"><b>Race</b></div><div class="pick" style="margin:6px 0 14px">`;
+  races.forEach(r=>h+=`<div class="opt ${d.race===r?'on':''}" onclick="setDraft('race','${r}')"><b>${RACES[r].name}</b><div class="muted small">${RACES[r].desc}</div></div>`);
+  h+=`</div>`;const p=previewStats(d);
+  h+=`<div class="statline" style="margin:6px 0 14px">`+STATNAMES.map(s=>`<div><b>${p[s]}</b><span>${s}</span></div>`).join("")+`</div>`;
+  h+=`<div class="muted small">HP ${50+p.VIT} · Energy ${Math.max(2,Math.floor(p.DEX/5))} · Memory ${Math.floor(p.FOC/5)}</div>`;
+  if(RACES[d.race].free){h+=`<div class="small" style="margin-top:10px"><b>Free starting skill</b></div><div class="pick" style="margin:6px 0 14px">`;
+    BASIC_SKILLS.filter(k=>statMeets(p,SKILLS[k])&&k!==CLASSES[d.cls].setSkill).forEach(k=>{const S=SKILLS[k];h+=`<div class="opt ${d.raceSkill===k?'on':''}" onclick="setDraft('raceSkill','${k}')"><b>${S.name}</b><div class="muted small">${S.cls} · ${S.req[0]} ${S.req[1]}</div></div>`;});
+    h+=`</div>`;}else h+=`<p class="muted small" style="margin-top:10px">Signature skill: <b>${cap(RACES[d.race].signature)}</b>.</p>`;
+  h+=`<div class="small muted">Class skill: <b>${SKILLS[CLASSES[d.cls].setSkill].name}</b></div>`;
+  h+=`<div class="row" style="margin-top:16px">${slot>0?'<button class="btn ghost" onclick="prevHero()">Back</button>':''}<button class="btn" onclick="confirmHero()">${slot<3?'Next Hero →':'Begin the March'}</button></div></div>`;
+  render(h);const inp=document.getElementById('hn');if(inp)inp.oninput=()=>CREATE.draft.name=inp.value;}
+function setDraft(k,v){const inp=document.getElementById('hn');if(inp)CREATE.draft.name=inp.value;CREATE.draft[k]=v;if(k==='cls'||k==='race')CREATE.draft.raceSkill=null;creationScreen();}
+function confirmHero(){const d=CREATE.draft,inp=document.getElementById('hn');if(inp)d.name=inp.value;if(!d.name)d.name=DEFNAMES[CREATE.slot];
+  if(RACES[d.race].free&&!d.raceSkill){const p=previewStats(d);d.raceSkill=BASIC_SKILLS.find(k=>statMeets(p,SKILLS[k])&&k!==CLASSES[d.cls].setSkill);}
+  CREATE.heroes[CREATE.slot]=makeHero(d.name,d.race,d.cls,d.raceSkill);
+  if(CREATE.slot<3){CREATE.slot++;CREATE.draft={name:"",race:"human",cls:["Fighter","Rogue","Wizard","Cleric"][CREATE.slot],raceSkill:null};creationScreen();}
+  else{G.party=CREATE.heroes.slice();G.party.forEach(u=>{u._statPts=0;u._skillPts=0;});newRun();screenMap();}}
+function prevHero(){if(CREATE.slot>0){CREATE.slot--;const hh=CREATE.heroes[CREATE.slot];CREATE.draft={name:hh.name,race:hh.race,cls:hh.cls,raceSkill:null};creationScreen();}}
+function screenMap(){let h=`<div class="panel"><div class="row spread"><div><div class="eyebrow">The March · ${cap(G.diff)}</div><h2 class="dsp">Your Road</h2></div><div class="muted small">Gold: <b>${G.gold}</b></div></div><div class="map" style="margin-top:10px">`;
+  G.run.nodes.forEach((n,i)=>{const cur=i===G.run.idx,name=n.darklord?DARKLORD.name:AREAS[n.area].name,chk=n.darklord?"The final formation.":AREAS[n.area].check;
+    h+=`<div class="node ${cur?'cur':''} ${n.done?'done':''}"><div class="n">${n.darklord?'☠':n.level}</div><div style="flex:1"><b class="dsp" style="color:#fff;font-size:15px">${name}</b><div class="muted small">${chk}</div></div>${cur?'<button class="btn sm" onclick="enterNode()">Enter</button>':n.done?'<span class="muted small">cleared</span>':'<span class="muted small">—</span>'}</div>`;});
+  h+=`</div><div class="row" style="margin-top:12px"><button class="btn ghost sm" onclick="manageScreen(screenMap,false)">Inspect Company</button></div></div>`;render(h);}
+function screenVictory(){G.meta.wins=(G.meta.wins||0)+1;saveMeta(G.meta);
+  render(`<div class="center" style="padding-top:40px"><div class="eyebrow">The formation breaks</div><h1 class="title">The Dark Lord Falls</h1><div class="rule"></div>
+    <p class="muted" style="max-width:520px;margin:0 auto 20px">Your company stands amid the wreckage of the tenth gate. The march is ended; the realm exhales.</p>
+    <button class="btn" onclick="screenTitle()">New March</button></div>`);}
+function screenDefeat(perma){render(`<div class="center" style="padding-top:40px"><div class="eyebrow">${perma?'Permadeath':'The line breaks'}</div><h1 class="title">Your Company Falls</h1><div class="rule"></div>
+    <p class="muted" style="max-width:520px;margin:0 auto 20px">${perma?'On Hard, the dead stay dead. This march is over.':'Wiped at area '+currentNode().level+'.'}</p>
+    <div class="row" style="justify-content:center">${!perma?'<button class="btn" onclick="retryNode()">Try this area again</button>':''}<button class="btn ghost" onclick="screenTitle()">Title</button></div></div>`);}
+function retryNode(){G.party.forEach(h=>{h.alive=true;h.hp=h.maxhp;h.st=freshStatus();});enterNode();}
+screenTitle();
+</script>
+</body>
+</html>
