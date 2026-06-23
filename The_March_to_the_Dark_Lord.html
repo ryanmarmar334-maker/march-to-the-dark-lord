@@ -638,23 +638,62 @@ function screenTitle(){const m=G.meta;
     <div class="row" style="justify-content:center;margin-top:8px"><button class="btn ghost" onclick="screenTutorial(0)">How to Play</button></div>
     <p class="muted small" style="margin-top:22px">Difficulty changes the world's cruelty, never the rules of the fight.</p></div>`);}
 const TUTORIAL=[
- {t:"The Basics",h:`<p><b>Your company of four</b> fights along a narrow corridor — your heroes start at the bottom, the foes at the top. Combat runs in <b>team phases</b>: move and act with every hero in any order you like, then press <b>End Turn</b> to let the foes move.</p>
-   <p style="margin-top:8px"><b>Energy</b> (the blue bar) is each hero's action budget for the round — about DEX ÷ 5. Moving one tile costs 1 energy; attacks cost their weapon's energy (light weapons' first swing each round is free); skills cost what their pill shows. A spent hero simply waits — select another, or End Turn.</p>
-   <p style="margin-top:8px"><b>The whole game is setup → payoff.</b> Apply a status with one hero, then cash it in with another: freeze a foe and Shatter it, set Burn and Combust it, stack Bleed and Rupture it.</p>
-   <p style="margin-top:8px"><b>Armour soak</b> (🛡) absorbs damage each round before HP is touched. Heavy weapons <b>Pierce</b> — their base damage ignores soak. Magic and damage-over-time also slip past armour, so a wall of plate has three answers.</p>`},
- {t:"The Six Statuses",h:`<div class="grid">
-   <div class="card"><b style="color:var(--burn)">🔥 Burn</b><div class="small">Fire damage at the start of the victim's turn, then fades by 1. Detonate the whole stack with <i>Combustion</i>.</div></div>
-   <div class="card"><b style="color:var(--bleed)">🩸 Bleed</b><div class="small">Triggers at the start of the victim's turn <b>and</b> whenever it moves (willingly or shoved) — not on attacking. Detonate with <i>Rupture</i>.</div></div>
-   <div class="card"><b style="color:var(--poison)">☠ Poison</b><div class="small">A set amount of damage for a set number of rounds, reduced by VIT÷5 each tick. Re-applying restarts the timer. <i>Purify</i> wipes it.</div></div>
-   <div class="card"><b style="color:var(--frost)">❄ Chill / Freeze</b><div class="small">Chill lowers a unit's energy by that amount. If Chill ≥ their energy they <b>Freeze</b> — they lose one whole round, and afterward all Chill is gone.</div></div>
-   <div class="card"><b style="color:var(--sunder)">🪓 Sunder</b><div class="small">Cuts armour soak for a few rounds. Pure setup so a big hit lands clean.</div></div>
-   <div class="card"><b style="color:var(--stun)">💫 Stun / Daze</b><div class="small">The target loses their whole next action. <i>Bash</i> dazes a foe and strips their turn outright.</div></div></div>`},
- {t:"Gear & Glyphs",h:`<p>Each hero wears five pieces: <b>head, body, feet,</b> and two <b>hands</b>. Hands hold a weapon plus either a second weapon, a <b>shield</b> (active soak you raise for 1 energy), or a caster <b>focus</b>. Heavier armour and shields need more <b>VIT</b>; heavy weapons need <b>STR 20</b>.</p>
-   <p style="margin-top:8px"><b>Glyphs</b> are socketed into gear by a Blacksmith (free if a party member knows Blacksmithing, else 5 gold in town). Rarer gear has more sockets (1 at common up to 6 at artifact), and <b>a glyph's power scales with its own rarity</b> — a rare Flame Glyph applies far more Burn than a common one. Flame/Razor/Venom ride your weapon hits; Stone and Vigor harden your armour.</p>
-   <p style="margin-top:8px"><b>Loot</b> drops five items after a fight — you keep three. Deeper areas and higher LCK pull richer rarities. Sell the rest in town; rank the <b>Trader</b> profession to sell for more, <b>Alchemy</b> to craft poison bottles, and <b>Blacksmithing</b> to socket free and plate allies mid-fight.</p>`},
- {t:"The March",h:`<p>Nine themed areas appear in shifting order, then the <b>Dark Lord</b> at the tenth gate. Each area is a skirmish followed by a boss that tests one thing — an armour wall, a freeze, a regenerator you must Burn, a swarm you must out-race.</p>
-   <p style="margin-top:8px">Clear a boss to <b>level up</b>: spend stat points to raise stats (and meet skill gates), and skill points to rank or learn skills and trades. On <b>Easy</b> you can Undo a round; on <b>Normal</b> a fallen hero returns at half health after each fight; on <b>Hard</b> the dead stay dead and a skill point costs 5 stat points.</p>
-   <p style="margin-top:8px">Go break a formation.</p>`}
+ {t:"Your Company",h:`<p><b>You forge exactly four heroes</b> — one of each class is the intended composition. Each class owns one half of the setup-and-payoff loop; the party has to combine them.</p>
+   <div class="grid" style="margin-top:10px">
+   <div class="card"><b style="color:var(--gold)">Fighter</b> <span class="muted small">STR / VIT</span><div class="small">Frontline. Absorbs hits, stuns foes, guards allies, and sunders armour so the rest of the party can land big damage.</div></div>
+   <div class="card"><b style="color:var(--gold)">Rogue</b> <span class="muted small">DEX / LCK</span><div class="small">Ranged setup. Applies Poison and Bleed from a distance, then detonates Bleed with Rupture for burst damage.</div></div>
+   <div class="card"><b style="color:var(--gold)">Wizard</b> <span class="muted small">FOC / LCK</span><div class="small">Ranged spells. Applies Burn and Chill, then detonates Burn with Combustion — ignoring armour entirely.</div></div>
+   <div class="card"><b style="color:var(--gold)">Cleric</b> <span class="muted small">VIT / FOC</span><div class="small">Support. Heals wounded allies, wipes Poison with Purify, and blesses the party for bonus damage on the next strike.</div></div></div>
+   <p style="margin-top:10px"><b>Stats in brief:</b> STR = melee damage · DEX = ranged damage + energy · FOC = spell power + Memory slots · VIT = HP + poison resistance · LCK = crit chance + loot rarity.</p>
+   <p style="margin-top:6px"><b>Memory slots</b> = FOC ÷ 5. This is the hard cap on how many skills a hero can know at once. A starting Wizard has 4 FOC → 4 slots. Raise FOC to unlock more.</p>`},
+ {t:"The Board & Combat Flow",h:`<p>Combat takes place on a <b>2-column × 6-row corridor</b>. Your heroes spawn in the bottom two rows; foes start in the top two rows. They march toward each other each round.</p>
+   <p style="margin-top:8px"><b>How a round works:</b> It's your team phase — act with all living heroes in any order you like, then press <b>End Turn</b>. The foes then take their turns and the next round begins.</p>
+   <p style="margin-top:8px"><b>How to act:</b> Click a hero to select them (highlighted gold border). Click an action pill at the bottom — Move, Attack, a skill, or an item. Valid targets highlight on the board. Click a highlighted tile or unit to execute. Click the same pill again to cancel.</p>
+   <p style="margin-top:8px"><b>Reach:</b> Most melee weapons only reach adjacent tiles (distance 1). Spears and Halberds reach distance 2. Bows and all spells reach the entire board — range is never an obstacle for a Wizard or Rogue.</p>`},
+ {t:"Energy & Actions",h:`<p>Each hero has an <b>Energy</b> budget per round (the blue bar below their HP). Energy = max(2, DEX ÷ 5) — a hero with DEX 20 gets 4 energy per round.</p>
+   <div class="grid" style="margin-top:10px">
+   <div class="card"><b>Move</b> <span class="muted small">1e per tile</span><div class="small">Step to any adjacent empty tile. Moving while Bleeding triggers Bleed damage — watch your footing.</div></div>
+   <div class="card"><b>Attack</b> <span class="muted small">0–2e</span><div class="small">Light weapons (Dagger, Shortbow…) cost <b>0e for the first swing each round</b>, then their listed cost. Medium weapons cost 1e. Heavy weapons cost 2e.</div></div>
+   <div class="card"><b>Raise Shield</b> <span class="muted small">1e</span><div class="small">Adds the shield's soak to your total for this round only. Use before taking a big hit.</div></div>
+   <div class="card"><b>Skills & Items</b> <span class="muted small">listed cost</span><div class="small">Skills cost their listed energy. Some have limited uses per fight (shown as · N in the pill). Items cost 1e to use.</div></div></div>
+   <p style="margin-top:10px">A hero with 0 energy can't act — select another hero or press <b>End Turn</b>. On <b>Easy</b>, the <b>Undo Round</b> button resets the whole round back to the start of your phase.</p>`},
+ {t:"Armour, Weapons & Damage",h:`<p><b>Soak</b> (the 🛡 number on each unit) refreshes at the start of every round and absorbs incoming damage before it touches HP. A foe with 12 soak ignores the first 12 damage of each hit. Burst them with multiple attacks in one round to strip soak fast.</p>
+   <p style="margin-top:8px"><b>Weapon tiers:</b></p>
+   <div class="grid" style="margin-top:6px">
+   <div class="card"><b>Light</b> <span class="muted small">Dagger · Shortsword · Shortbow</span><div class="small">First swing each round costs 0 energy. Good for heroes who want to act twice cheaply.</div></div>
+   <div class="card"><b>Medium</b> <span class="muted small">Longsword · Hammer · Spear · Bow</span><div class="small">1 energy per attack. Solid base damage with no gates.</div></div>
+   <div class="card"><b>Heavy · Pierce</b> <span class="muted small">Claymore · Battle Axe · Halberd · Crossbow</span><div class="small">2e, require <b>STR 20</b>. Their <b>base damage bypasses soak entirely</b> — only the stat-scaling portion is soaked. Ideal against plated enemies.</div></div></div>
+   <p style="margin-top:10px"><b>Three ways through heavy armour:</b> Pierce (heavy weapons), spells (ignore soak entirely), or damage-over-time (DoTs bypass soak). Heavier armour and shields need higher VIT to equip.</p>`},
+ {t:"The Six Statuses",h:`<p class="muted small" style="margin-bottom:10px">The whole game is <b>set a status, then cash it in.</b> Each class applies different ones — combine them across your party for the payoff.</p>
+   <div class="grid">
+   <div class="card"><b style="color:var(--burn)">🔥 Burn</b><div class="small">Fire damage at the start of the victim's turn, then fades by 1. Detonate the whole stack with <i>Combustion</i> (ignores armour).</div></div>
+   <div class="card"><b style="color:var(--bleed)">🩸 Bleed</b><div class="small">Triggers at the start of the victim's turn <b>and whenever it moves</b> — not on attacking. Fades by 1 each turn. Detonate with <i>Rupture</i>.</div></div>
+   <div class="card"><b style="color:var(--poison)">☠ Poison</b><div class="small">Fixed damage per round for a set number of rounds, reduced by VIT÷5. Re-applying restarts the timer. <i>Purify</i> wipes it entirely.</div></div>
+   <div class="card"><b style="color:var(--frost)">❄ Chill / Freeze</b><div class="small">Chill lowers available energy by its amount each round, then fades by 1. If Chill ≥ max energy the unit <b>Freezes</b> — loses the whole round, then all Chill is gone.</div></div>
+   <div class="card"><b style="color:var(--sunder)">🪓 Sunder</b><div class="small">Cuts armour soak by a set amount for a few rounds. Pure setup — land it, then hit hard while the armour is stripped.</div></div>
+   <div class="card"><b style="color:var(--stun)">💫 Stun / Daze</b><div class="small">The target loses their whole next action. <i>Bash</i> also zeroes the target's current energy, stripping their turn outright.</div></div></div>`},
+ {t:"Gear, Glyphs & Professions",h:`<p>Each hero wears <b>five slots</b>: head, body, feet, hand1, hand2. The hand slots hold a weapon plus optionally a shield, a second weapon, or a caster focus. Heavier armour needs higher VIT; heavy weapons need STR 20.</p>
+   <p style="margin-top:8px"><b>Glyphs</b> are enchantments socketed into gear. Weapon glyphs (Flame, Razor, Venom) trigger on every hit; armour glyphs (Stone, Vigor) add soak or max HP. Rarer gear has more socket slots (1 at common → 6 at artifact). <b>A glyph's strength scales with its own rarity</b> — an artifact Flame Glyph applies 6 Burn per hit vs. 1 for a common. Socketing costs 5 gold at a shop, or is free if a party member has the Blacksmithing profession.</p>
+   <p style="margin-top:8px"><b>Professions</b> unlock when a hero meets the stat requirement:</p>
+   <div class="grid" style="margin-top:6px">
+   <div class="card"><b>Alchemy</b> <span class="muted small">FOC 20</span><div class="small">Seeds poison bottles and molotovs into every shop stock.</div></div>
+   <div class="card"><b>Trader</b> <span class="muted small">LCK 15</span><div class="small">Improves sell prices from 25% up to 50% at rank 5.</div></div>
+   <div class="card"><b>Blacksmithing</b> <span class="muted small">STR 20</span><div class="small">Socket glyphs for free. In combat, spend 1e to plate an ally for +5 soak that round (2 uses per fight).</div></div></div>`},
+ {t:"Between Fights",h:`<p>Understanding the flow between fights is as important as the fighting itself.</p>
+   <p style="margin-top:8px"><b>After every skirmish:</b> Pick 3 of 5 loot items, then the boss intro screen appears. LCK bumps loot rarity — keep it high on at least one hero.</p>
+   <p style="margin-top:8px"><b>After every boss:</b> All living heroes <b>level up</b> (+2 stat points, +1 skill point each). Then: loot → Manage screen → Shop → back to the map.</p>
+   <div class="grid" style="margin-top:8px">
+   <div class="card"><b>Manage Screen</b><div class="small">Spend <b>stat points</b> to raise STR/DEX/FOC/VIT/LCK — this unlocks new skills, gear gates, and profession access. Spend <b>skill points</b> to learn a new skill (1 point; capped by Memory slots) or rank an existing one R1→R5 for stronger effects.</div></div>
+   <div class="card"><b>Shop</b><div class="small">Buy gear and consumables with gold. Prices: 3g (common) → 20g (artifact). You start with 30 gold. Sell unwanted items from your stash for 25–50% back depending on Trader rank.</div></div></div>
+   <p style="margin-top:10px">On <b>Hard</b>, each skill point costs 5 stat points instead of being a separate resource. Plan your stat growth carefully.</p>`},
+ {t:"The March",h:`<p>Nine of ten themed areas appear in random order each run. <b>The Dark Lord is always last.</b> Each area is one skirmish followed by one boss. The map shows a hint for each boss — read it before you enter and prepare accordingly.</p>
+   <p style="margin-top:8px">Every boss tests a specific strategy: one demands Pierce or spells to crack armour, another keeps regenerating until you apply Burn, another floods the board with adds at half HP. The hint tells you what's coming.</p>
+   <p style="margin-top:8px"><b>Difficulty:</b></p>
+   <div class="grid" style="margin-top:6px">
+   <div class="card"><b>Easy</b><div class="small">Undo Round button resets your phase. Fallen heroes revive at full HP after each fight.</div></div>
+   <div class="card"><b>Normal</b><div class="small">No undo. Fallen heroes revive at half HP after each fight.</div></div>
+   <div class="card"><b>Hard</b><div class="small">Permadeath — the dead stay dead. Skill points cost 5 stat points each. No safety net.</div></div></div>
+   <p style="margin-top:10px">Meta unlocks (Dwarf race, Bard class) persist across runs on Normal and Hard. They're earned through play — keep pushing.<br><br><b>Go break a formation.</b></p>`}
 ];
 function screenTutorial(i){i=clamp(i,0,TUTORIAL.length-1);const p=TUTORIAL[i];
   render(`<div class="panel"><div class="eyebrow">How to Play · ${i+1}/${TUTORIAL.length}</div><h2 class="dsp">${p.t}</h2>${p.h}
